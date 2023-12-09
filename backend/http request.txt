@@ -1,0 +1,54 @@
+ესეიგი გავაგზავნეთ რექუესტი ტოკენის გამოყენებით მივიღეთ ინფორმაცია 
+და შემდეგ ჰაიპერ ლინკის გამოყენებით რომელიც გავაკეთე DRFში გავაგზავნეთ კიდევ ერთი რექუესტი
+რათა მიგვეღო პოსტების ინფორმაცია
+
+let cont = document.querySelector(".container");
+      let getRooms = async () => {
+        // Assuming your JWT token is stored in a variable named 'jwtToken'
+        let jwtToken =
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzAyMTE2MjEyLCJpYXQiOjE3MDIxMDg5NDQsImp0aSI6ImRjZTBiNWY4MDUzODRkNzFhODA4M2RmYjk5ZTBlMWIwIiwidXNlcl9pZCI6OX0.9224pUwEENfimzXQdAv77gufHxPAhoaOeZGu47_wWqI"; // Replace this with your actual JWT token
+
+        try {
+          let response = await fetch("http://127.0.0.1:8000/posts_for_user/", {
+            headers: {
+              "Authorization": `Bearer ${jwtToken}`, // Set the Authorization header with the JWT token
+              "Content-Type": "application/json", // Assuming the content type is JSON
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          let products = await response.json();
+
+          let posts = products.posts;
+
+          // Assuming 'cont' is a reference to an HTML element where you'll display the products
+
+          for (let index = 0; index < posts.length; index++) {
+            const element = posts[index];
+
+            let response2 = await fetch(element, {
+              headers: {
+                "Authorization": `Bearer ${jwtToken}`, // Set the Authorization header with the JWT token
+                "Content-Type": "application/json", // Assuming the content type is JSON
+              },
+            });
+
+            let posts2 = await response2.json();
+
+            let html = `
+              <div style="gap: 1rem; display: flex;">
+                <p>product Name ${posts2.title}</p> <!-- Assuming 'name' is a property of your product -->
+              </div>
+            `;
+
+            cont.innerHTML += html;
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      };
+
+      getRooms();

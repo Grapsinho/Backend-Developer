@@ -1,0 +1,30 @@
+ესეიგი პირველი არის HyperlinkRelatedField
+
+და როდესაც გავაგზავნით მოთხოვნას პოსტზე ინფორმაცია მოვა ლინკის სახით
+ანუ მაგალითად
+http://127.0.0.1:8000/posts/5 ასეთი რამე მოვა რა
+
+სერიალაიზერში ვწერთ ამას
+posts = serializers.HyperlinkedRelatedField(
+        many=True, view_name="pagePosts_details", queryset=User.objects.all()
+    )
+
+ესეიგი view სახელში იმ viewს სახელს ვწერთ რომელიც არუნებს ცალკეულ პოსტებს მაგალითად ასე
+path("posts/<int:pk>", views.PostCrudView.as_view(), name="pagePosts_details")
+
+და ეს უკვე view ფუნქცია 
+@api_view(http_method_names=["GET"])
+@permission_classes([])
+def posts_for_user(request: Request):
+    user = request.user
+
+    serializer = UserPostsSerializer(instance=user, context={"request": request})
+    return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
+და რათქმაუნდა როდესაც პოსტს შევქმნით არუნდა დაგვავიწყდეს რომ შევუქმნათ იუზერიც
+def perform_create(self, serializer):
+        # ვიღებთ იუზერს რომელმაც შექმნა პოსტი
+        user = self.request.user
+        serializer.save(author=user)
+        return super().perform_create(serializer)
