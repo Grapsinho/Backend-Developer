@@ -3,3 +3,85 @@ pip install djangorestframework-simplejwt
 
 და იმ რესთ ფრეიმვორკის ლისტში ვამატებთ ამას
 "rest_framework_simplejwt.authentication.JWTAuthentication",
+
+
+ეს ყველაფერი იქნება ურლ ფაილში
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
+
+urlpatterns = [
+    path("signup/", views.SignUpView.as_view(), name="signup"),
+    path("users/", views.UserListView.as_view(), name="users"),
+    path("login/", views.LoginView.as_view(), name="login"),
+
+
+    # ამით ვქმნით ტოკენს
+    path("jwt/create/", TokenObtainPairView.as_view(), name="jwt-create"),
+        # ამით ვარეფრეშებთ ანუ ახალ ტოკენს ვიღებთ
+    path("jwt/refresh/", TokenRefreshView.as_view(), name="jwt-refresh"),
+        # ამით ვტესტავთ კარგია თუ არა ეს ახალი ტოკენი
+    path("jwt/verify/", TokenVerifyView.as_view(), name="jwt-verify"),
+]
+
+
+ეს უკვე არის ცალკე ფიალი tokens
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+
+def create_jwt_for_user(user: User):
+    refresh = RefreshToken.for_user(user)
+
+    tokens = {"access": str(refresh.access_token), "refresh": str(refresh)}
+
+    return tokens
+
+
+# ამ ყველაფრით ჩვენ შეგვიძლია როდესაც იუზერს დავალოგინებთ იქვე მივაყოლოთ ტოკენი
+
+
+
+აქ უკვე view ფაილში ვიყენებთ ამ ტოკენს
+from .tokens import create_jwt_for_user
+
+def post(self, request: Request):
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        user = authenticate(password=password, email=email)
+
+        if user is not None:
+            # როდესაც იუზერი დალოგინდება შევუქმნით ტოკენს
+            tokens = create_jwt_for_user(user)
+            response = {
+                "message": "user login successful",
+                "tokens": tokens,
+            }
+
+            return Response(data=response, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                data={"message": "email or password is invalid"},
+            )
+
+
+სეთინგების ფაილში
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+     #რამდენი ხანი იქნება ტოკენი 
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=2),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+        არვიცი უბრალოდ სექრეთ ქის ვაძლევთ არვიცი ეს რა არის
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    # "Bearer <Token>"
+}
+
+
