@@ -1,0 +1,181 @@
+ესეიგი თავიდან გვჭირდება გადმოვწეროთ რესთ ფრეიმვორკი
+pip install djangorestframework
+და ეს უნდა შევიტანოთ ინსტალედ აპებში 'rest_framework'
+
+ესეიგი ეს ყველაფერი გვჭირდება ეიპიაისთვის
+from rest_framework.request import Request
+from rest_framework.response import Response
+
+ეს გჭირდება იმიტომ რო ვუთხრათ ჯანგოს რო ეს არის ეიპიაი
+from rest_framework.decorators import api_view, APIView
+
+
+//////////////////////////////////////////////////////////////////////////
+/////////////////////////////serializer///////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+ესეიგი სერიალაიზერი არის ეგეთი რაღაც ანუ ამას ჩვენი მონაცემები გადაყავს ჯეისონ ფაილში რათა ფრონტ ენდ ენებმა ეს წაიკითხონ
+
+რო შევქმნათ საჭიროა ცალკე ფაილი იმავე საქარალდეში serializers.py
+
+ეს არის ჩვეულებრივი სერიალაიზერი რათქმაუნდა იმ მოდელის მიხედვით შევქმენით რომელიც გავაკეთეთ ანუ ეს Post მოდელი რომელზეც ჩავატარებთ რაღაც ოპერაციებს
+from rest_framework import serializers
+from .models import Post
+
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ['id', 'title', 'content', 'created']
+
+მოგვაქ ჩვენი სერიალაიზერი
+from .serializers import *
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////CRUD ოპერაციები////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+from rest_framework import status
+
+ესეიგი ამით ვუთხარი რო ამ view შეგვეძლება როგორც წაღება ისე წამოღება ინფორმაციის
+ასევე ამ viewში ვქმნი ინფორმაციას და ვგზავნი უკან
+@api_view(http_method_names=["GET", "POST"])
+def pagePosts(request: Request):
+    posts = Post.objects.all()
+
+    if request.method == "POST":
+        # წამოვიღეთ დატა
+        data = request.data
+
+        # გადავეცით სერიალაიზერს
+        serializer = PostSerializer(data=data)
+
+        # და უბრალოდ ჩვეულებრივად შევამოწმეთ და დავასეივეთ
+        if serializer.is_valid():
+            serializer.save()
+
+            response = {"message": "Data Created", "data": serializer.data}
+
+            return Response(data=response, status=status.HTTP_201_CREATED)
+
+        # თუ არარის ვალიდური დატა
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # ინსტანსე არის დატა რომელიც გვინდა რომ დავაიმპორტოთ
+    # მოკლედ როცა ქუერი სეთი მოგვაქ მანი უნდა დავუწეროთ
+    serializer = PostSerializer(instance=posts, many=True)
+
+    response = {"message": "hello", "data": serializer.data}
+
+    return Response(data=response, status=status.HTTP_200_OK)
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+ამით უკვე მხოლოდ ის პოსტები მოგვაქ რომლის აიდიც ემთხვევა
+@api_view(http_method_names=["GET"])
+def pagePosts_details(request: Request, post_index: int):
+    some_post = Post.objects.get(id=post_index)
+
+    serializer = PostSerializer(instance=some_post)
+
+    response = {"message": "hello", "data": serializer.data}
+
+    try:
+        if some_post:
+            return Response(data=response, status=status.HTTP_200_OK)
+    except:
+        return Response(
+            data={"error": "Post Not Found"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+
+პუთ იმიტო რო ვააბდეითებთ
+@api_view(http_method_names=["PUT"])
+def update_post(request: Request, post_id: int):
+    some_post = Post.objects.get(id=post_id)
+
+    data = request.data
+
+    # ინსტანსე იქნება ობჯექტი რომელიც გვინდა რომ დავააბდეითოთ და დატა იქნება დატა რომელიც გვინდა რომ გამოვიყენოთ
+    serializer = PostSerializer(instance=some_post, data=data)
+
+    if serializer.is_valid():
+        serializer.save()
+        response = {"message": "Data Updated", "data": serializer.data}
+
+        return Response(data=response, status=status.HTTP_200_OK)
+
+    return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(http_method_names=["DELETE"])
+def delete_post(request: Request, post_id: int):
+    some_post = Post.objects.get(id=post_id)
+    some_post.delete()
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+მოკლედ არის class based viewები და ეხლა აქ არ გადმოვიტან როდესაც გითჰაბზე ავტვირთავ ამ პროექტს იქ იქნება და რორამე ვნახავ ხოლმე
+
+
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////Token Authorization/////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+მოკლედ იუზერი რო დავარეგისტრიროთ ტოკენის გმაოყენებით ესეიგი პირველ რიგში საჭიროა ესენი სეთინგებში
+
+ეს ლექსიკონი შეიცავს კონფიგურაციებს ჯანგო რესთ ფრეიმორკისთვის
+REST_FRAMEWORK = {
+    აქ კი არის აუთენთიფიკაციის კლასები
+    რესთ ფერიმოვორკი ცდის ყველა მათგანს სანამ წარმატებული აუთენთიფიკაცია არ მოხდება
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+    ),
+    და აქ ანუ ნებართვას ვაძლევთ მხოლოდ დარეგისტრირებულ იუზერებს
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated"),
+}
+
+ეს ინსტალედ აპპებში
+"rest_framework.authtoken",
+
+
+შემდეგ გადავდივართ სერიალაიზერში
+from rest_framework.authtoken.models import Token
+
+და ქრიეითში ვწერთ
+ვქმნით ტოკენს იუზერის სეივის დაბლა და შემდეგ მიგრაციას ვუკეთებთ
+Token.objects.create(user=user)
+
+და ანუ როდესაც ამ ყველაფერს ვიზავთ შემდეგ რა კლასსაც შევქმნით ვიუში ჯობია რო ეს დავუწეროთ თავშივე  permission_classes = [] როგორც ამას დაბლა
+
+ამით უკვე ვალოგინებთ იუზერს
+class LoginView(APIView):
+    permission_classes = []
+
+    def post(self, request: Request):
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        user = authenticate(password=password, email=email)
+
+        if user is not None:
+            response = {
+                "message": "user login successful",
+                "token": user.auth_token.key,
+            }
+
+            return Response(data=response, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                data={"message": "email or password is invalid"},
+            )
+
+    def get(self, request: Request):
+        # ანუ დარეგისტრირებული და დალოგინებული იუზერიდან ვიღებთ ამ ორს
+        content = {"user": str(request.user), "auth": str(request.auth)}
+
+        return Response(data=content, status=status.HTTP_200_OK)

@@ -1,0 +1,4 @@
+\l: Lists all databases.
+\c <database_name>: Connects to a specific database.
+\dt: Displays all tables in the connected database.
+\d+ <table_name>: Describes the structure of a specific table.

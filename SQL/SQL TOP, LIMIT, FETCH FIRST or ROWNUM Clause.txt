@@ -1,0 +1,23 @@
+მოკლედ რაღაც ქომენდები იყო იქ და ზოგი ზოგ სისტემებზე არ მუშაობს მაგ: mySQL, oracle და ასშ...
+
+SELECT column_name(s) s იმიტო უწერია რო შეგვიძლია ერთი ან მეტი ანუ არაფერია რა ეგ პროსტა უწერია
+FROM table_name
+WHERE condition
+LIMIT number;
+
+
+ანუ ეს პირველ სამ სვეტს წამოიღებს
+SELECT TOP 3 * FROM Customers;
+
+აქ უკვე რამდენის წამოღება გვინდა ლიმიტს ვუწერთ
+SELECT * FROM Customers
+LIMIT 3;
+
+ეს გვიჩვენებს 50%ს მხოლოდ
+SELECT TOP 50 PERCENT * FROM Customers;
+
+და ამეებს ჩვ შეგვიზლია გავუწეროთ WHERE clause
+
+თუ გამოვიყენებთ OFFSET ამათთან ერთად მაშინ რასაც ამას მივუთითებთ იქიდან დავიწყებთ მონაცემების წამოღებას
+
+SELECT * FROM students LIMIT 5 OFFSET 2 ანუ 5 ელემენტს წამოვიღებთ ვიწყებთ მეორედან

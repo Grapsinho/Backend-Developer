@@ -1,0 +1,10 @@
+git tag -a v1.0 -m "Version 1.0 released" <commit_hash> ვამატებთ ტაგებს უბრალოდ რომელიმე კომიტზე
+git tag v1.0 <commit_hash> მიმდინარე კომიტს ამატებს ტეგს
+git tag ტეგების ლისტი
+
+git push origin <tag_name> ამით ვტვირთავთ ტეგებს რემოუთ რეპოზიტორიაში
+
+git checkout <tag name> გადავალათ ამ კომიტზე რომელსაც ეს ტაგ ნეიმი აქ
+
+git tag -d tag name შლის ტეგს
+git push origin --delete tag name შლის ტეგს რემოთ სერვერზე

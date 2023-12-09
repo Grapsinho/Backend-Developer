@@ -1,0 +1,41 @@
+row_number: 
+
+select user_id, user_name, email
+from (
+select *,
+row_number() over (partition by user_name order by user_id) as rn
+from users u
+order by user_id) x
+where x.rn <> 1;
+
+ესეიგი როცა ვწერთ ამ ქომანდს
+select *,
+row_number() over (partition by user_name order by user_id) as rn
+from users u
+order by user_id
+
+ეს ხაზი აკეთებს ესეთ რამეს, ასერომვთქვათ როუებს ალაგებს ჯგუფებას 
+მაგალითად თუ გვაქ სახელი გიორგი და მეორე ხაზზე კიდევ იგივე სახელი მაშ ეს ორი როუ იქნება ერთად და 
+ის როუ რომელიც არის მეორე ანუ არარი უნიკალური იმას ექნება მნიშვნელობა 2 ამ შემთხვევაში rn იქნება 2 ხოლო იმ პირველისთვის 1
+row_number() over (partition by user_name order by user_id) as rn 
+
+RANK:
+
+select pro.name, itm.price, rn from
+(select *, RANK() over(partition by product_id order by price DESC) as rn from item) as itm
+JOIN product as pro ON pro.id = itm.product_id
+
+მოკლედ რა ხდება მა ხაზზე ჩვენ ვაჯგუფებთ როუებს პროდუქტ აიდის მიხედვით და შემდეგ ყველას ვუთითებთ რანკს, ერთნაირი აიდის მქონე პროდუქტებს ვალაგებთ DESCით ასე შეგვიძლია გავიგოთ მაგალითად 3 ყველაზე ძვირადღირებული პროდუქტი სახელის მიხედვით
+(select *, RANK() over(partition by product_id order by price DESC) as rn from item) as itm
+
+DENSE_RANK
+ერთადერთი განსხვავება ამისა და რანკს შორის არის ის რომ რანკ როცა ვიყენებთ და გვაქ ორი ერთნაირი როუ მაშინ ის დასკიპავს მნიშნველობას ანუ 1,2,2(დუპლიკატი),4 ანუ აქ 3 დაისკიპა ხოლო დენსეში ეს სამი არ დაისკიპება
+
+
+
+
+
+
+
+
+

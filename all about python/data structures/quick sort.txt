@@ -1,0 +1,49 @@
+ესეიგი ეს არის ალგორითმი სადაც ვირჩევთ ერთ საყრდენ ელემენტს და მის გარშემო ვალაგებთ მაღალ და დაბალ ელემენტებს მარცხნივ იქნებიან დაბალი მარჯვნივ მაღლები
+
+როგორც ხედავთ, Quicksort-ის ეფექტურობა ხშირად დამოკიდებულია არჩევანზე pivot. თუ შეყვანის მასივი დაუხარისხებელია, მაშინ პირველი ან ბოლო ელემენტის გამოყენება იმუშავებს pivotისევე, როგორც შემთხვევითი ელემენტი. მაგრამ თუ შეყვანის მასივი დალაგებულია ან თითქმის დალაგებულია, პირველი ან ბოლო ელემენტის გამოყენებამ შეიძლება pivotგამოიწვიოს ყველაზე უარესი სცენარი. შემთხვევითი არჩევით pivotუფრო სავარაუდოა, რომ Quicksort შეარჩევს მნიშვნელობას უფრო ახლოს მედიანასთან და დაასრულებს უფრო სწრაფად.
+
+თუ ჩვენი ლისტი უკვე დახარისხებული ან ცოტათია დახარისხებული ჯობია სხვა სორტები გამოვიყენოთ
+
+def quick_sort(array):
+    if len(array) <= 1:
+        return array
+    else:
+        pivot = array[0]
+        right = [i for i in array[1:] if i > pivot]
+        left = [i for i in array[1:] if i <= pivot]
+        # ანუ აქ ჩვენ უბრალოდ თავიდან ვასორტირებთ მარცხენა და მარჯვენა ლისტებს სხვა ისეთი არაფერია
+        # როცა დასორტირდება შემდეგ მიემატება და ეგაა
+        return quick_sort(left) + [pivot] + quick_sort(right)
+
+ზუსტად იგივე რაღაცეებს ვაკეთებთ ვამოწმებთ არის თუ არა მაღალი ან დაბალი ელემენტი საყრდენ ელემენტზე და შემდეგ მათ ვასორტირებთ თავიდან
+
+[i for i in array[:-1] if i > pivot]
+[i for i in array[:-1] if i <= pivot]
+
+თუ გვინდა რომ ბოლო ელემენტიდან დავიწყოთ ანუ საყრდენი იყოს ბოლო ელემენტი ვშვებით ასე
+
+
+pivot = array[randint(0, len(array) - 1)]
+right = [i for i in array if i > pivot]
+left = [i for i in array if i < pivot]
+pivots = [x for x in array if x == pivot]
+
+ეს უკვე როცა რენდომულად ვიღებთ საყრდენს
+
+
+def quick_sort_median(array):
+    if len(array) <= 1:
+        return array
+
+    first = array[0]
+    middle = array[len(array) // 2]
+    last = array[-1]
+    pivot = sorted([first, middle, last])[1]  # median of first, middle, and last
+
+    lows = [x for x in array if x < pivot]
+    highs = [x for x in array if x > pivot]
+    pivots = [x for x in array if x == pivot]
+
+    return quick_sort_median(lows) + pivots + quick_sort_median(highs)
+
+და ეს უკვე მედიანათი

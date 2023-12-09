@@ -1,0 +1,25 @@
+ძირითადად ეს ფუნქციისგან განსხვავდება იმით რომ აქ შეგვიძლია შევცვალოთ ქოლუმნები დავამატოთ როუები და ასშ წავშალოთ და ასშ
+
+ამ პროცედურალში ვაკეთებთ ასეთ რამეს ვაძლევთ მომხმარებლის აიდს და რამდენი ქონდა გადასახდელი შემდეგ მაგის მიხედვით ვაკლებთ და ვააბდეითებთ
+CREATE OR REPLACE PROCEDURE pr_debt_paid(
+	past_due_id int,
+	payment numeric
+)
+AS
+$body$
+DECLARE
+
+BEGIN
+	UPDATE past_due
+	SET balance = balance - payment
+	WHERE id = past_due_id;
+	
+	COMMIT;
+END;
+$body$
+LANGUAGE PLPGSQL;
+
+-- Execute procedure
+CALL pr_debt_paid(1, 10.00);
+
+SELECT * FROM past_due;

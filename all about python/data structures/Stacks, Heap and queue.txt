@@ -1,0 +1,165 @@
+//////////////////////////////////////////////////////////////////
+//////////////////////////Stacks//////////////////////////////////
+//////////////////////////////////////////////////////////////////
+
+მოკლედ სტაკი არის ანუ ამდროს ბოლო ელემენტი ეთიშება აი მაგალითად redoს გასაკეთებლად გამოგვადგება ანუ მაგალითად გვაქ [1, 2, 3] ამდროს თუ გვინდა რომ გადავიდეთ წინა საიტზე მაგალითად ვაკეთებთ რედოს და [1, 2] 3 ამოვარდება ანუ მსგავს რაღაცას აკეთებს რა.
+
+ანუ ბოლო ელემენტი რომელიც ჩაჯდება იქნება პირველი რომელიც ამოვარდება LIFO
+
+stack = []
+stack.append(1)
+stack.append(2)
+stack.append(3)
+print(stack) # Output: [1, 2, 3]
+top_element = stack.pop()
+print(top_element) # Output: 3
+print(stack) # Output: [1, 2]
+
+ლისტში ავფენდეთ 1,2,3 და შემდეგ ამოვაგდეთ ბოლო .pop() ის დახმარებით ამას ნიშნავს სტაკი რა
+
+
+
+
+//////////////////////////////////////////////////////////////////
+///////////////////////////Queue//////////////////////////////////
+//////////////////////////////////////////////////////////////////
+
+
+ეს ნიშნავს რომ პირველი ელემენტი რომელიც დაემატა ლისტში იქნება პირველი ელემენტი რომელიც ამოვარდება ამ ლისტიდან
+
+ანუ ხალხის რიგს გავს რა მაგალითად მაღაზიაში პირველი ადამინი რომელიც არის მოლარესთან იქნება პირველი რომელიც გამოვა იქედან და ასშ
+
+
+from collections import deque
+
+queue = deque()
+queue.append(1)
+queue.append(2)
+queue.append(3)
+print(queue) # Output: deque([1, 2, 3])
+first_element = queue.popleft()
+print(first_element) # Output: 1
+print(queue) # Output: deque([2, 3])
+
+
+ამ მაგალითში ჩვენ ვქმნით ცარიელ რიგს dequeმოდულის კლასის გამოყენებით collections. მეთოდის გამოყენებით რიგის ბოლოს სამ ელემენტს ვდებთ რიგში append(). შემდეგ ჩვენ ვხსნით პირველ ელემენტს რიგიდან მეთოდის გამოყენებით popleft()და ვინახავთ მას ცვლადში first_element. ბოლოს ვბეჭდავთ პირველ ელემენტს და განახლებულ რიგს.
+
+
+import time
+
+from collections import deque
+
+costumers = {
+    "Giorgi": ["Pizza", "mwvadi", "xinkali, qababi"],
+    "Rati": ["Qababi", "mwvadi", "sushi"],
+    "Saba": ["salad", "mwvadi", "ravirame"],
+    "Gocha": ["qababi", "mwvadi", "xinkali"],
+}
+
+def momsaxureba():
+    queue = deque()
+
+    for customer, order in costumers.items():
+        queue.append((customer, order))
+
+
+    while queue:
+        customer, order = queue.popleft() # აქ სახელები და შეკვეთა დავშალეთ სათითაოდ და შემდეგ გამოვაგდეთ ლისტიდან
+        order_str = ", ".join(order) # ანუ ეს კი ბეჭდავს ჩვენს იმ ლისტს საჭმელების ასე: Pizza, mwvadi, xinkali, qababi
+        print(f"{customer}, your {order_str} are done")
+        time.sleep(1)
+
+
+momsaxureba()
+
+
+
+
+import time
+
+from collections import deque
+
+class queue:
+    def __init__(self):
+        self.queue = deque()
+
+    def addJob(self, name, pages):
+        self.queue.append((name,pages))
+
+    def print_jobs(self):
+        while self.queue:
+            name, pages = self.queue.popleft()
+            print(f"Printing {pages} pages for job '{name}'")
+            time.sleep(pages/10)
+            print(f"Job '{name}' completed")
+
+
+pq = queue()
+
+pq.addJob("Document1", 5)
+pq.addJob("Document2", 10)
+pq.addJob("Document3", 15)
+
+pq.print_jobs()
+
+
+
+
+
+class Queue:
+    def __init__(self):
+        self.buffer = deque()
+
+    def enqueue(self, val):
+        self.buffer.appendleft(val)
+
+    def dequeue(self):
+        if len(self.buffer)==0:
+            print("Queue is empty")
+            return
+
+        return self.buffer.pop()
+
+    def is_empty(self):
+        return len(self.buffer) == 0
+
+    def size(self):
+        return len(self.buffer)
+
+    def front(self):
+        return self.buffer[-1]
+
+
+
+
+//////////////////////////////////////////////////////////////////
+////////////////////////////Heap//////////////////////////////////
+//////////////////////////////////////////////////////////////////
+
+
+ესეიგი არსებობს ორი სახის heap: min heap, max heap
+ანუ როგორც გავიგე უფრო მაღალი წონის წონის რა ანუ უფრო დიდი რაღაც მეხსირების ალბათ მქონე ელემენტს უფრო მეტი პრიორიტეტი ეწოდება დამუშავებისას
+
+ანუ როდესაც ჰიპს ვქმნით ყველზე პატარა ელემენტი ყოველთვის თავშია ანუ პირველია
+
+ესეიგი ჰიპი ძირითადად გამოგვადგება იმისთვის რომ ვიპოვოთ მინიმუმი ან მაქსიმუმი ეს მარტივად რომ ვთქვათ შეგვიძლია ჩავამწკრივოთ ელემენტები მათი პრიორიტეტის მიხედვით მაგლაითად:
+
+სამუშაოს დაგეგმვა: Heaps შეიძლება გამოყენებულ იქნას სისტემაში სამუშაოების დასაგეგმად მათი პრიორიტეტების მიხედვით.
+
+პრიორიტეტული რიგების დანერგვა: Heaps შეიძლება გამოყენებულ იქნას პრიორიტეტული რიგების განსახორციელებლად, ეს არის მონაცემთა სტრუქტურები, რომლებიც იძლევა პრიორიტეტული ელემენტების ეფექტურად ჩასმას და უმაღლესი პრიორიტეტის მქონე ელემენტის სწრაფ მოძიებას.
+
+
+
+ვქმნით ჰიპს
+
+import heapq
+
+H = [21,1,45,78,3,5]
+# Use heapify to rearrange the elements
+heapq.heapify(H)
+print(H)
+
+
+heapq.heappush(H,8) ამით ვსვავთ ელემენტს ჰიპში
+heapq.heappop(H) ამით ვშლით
+heapq.heapreplace(H,6) ანუ ამით შეგვიძლია ჩავანაცვლოთ ყველზე პატარა ელემენტი

@@ -1,0 +1,1 @@
+რავი პირველად ჩაიწერა pip install django-crispy-forms ეს, ინსტალედ აპებში ვწერთ crispy-forms

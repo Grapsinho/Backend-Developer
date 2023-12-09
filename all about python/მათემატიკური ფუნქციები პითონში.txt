@@ -1,0 +1,8 @@
+round() = rounds a number
+math.ceil(number) = Rounds a number up to the nearest integer
+math.floor() = Rounds a number down to the nearest integer
+abs() = Returns the absolute value of a number
+math.pow() = Returns the value of x to the power of y
+math.sqrt() = Returns the square root of a number
+max() = Returns the largest item in an iterable
+min() = Returns the smallest item in an iterable

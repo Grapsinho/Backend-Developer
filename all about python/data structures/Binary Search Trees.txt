@@ -1,0 +1,188 @@
+ეს არის მონაცემთა სტრუქტურის ტიპი რომელიც გამოიყენება მონაცემთა შესანახად და ორგანიზებისთვის ისე რომ შეგვიძლია გამოვიყენოთ ჩასმის წაშლის და ძიების ოპერაციები
+
+BST შეიცავს nodeს და ორ შვილობილ node მარცხენა და მარჯვენა
+
+ანუ მარცხენა მხარე ყოველთვის ნაკლებია მის მშობელის მნიშვნელობაზე ხოლო მარჯვენა პირიქით ყოველთვის მაღალია
+
+ეს თვისება უზრუნველყოფს ხეში კვანძის ძიებას O(log n) დროის სირთულის პირობებში, სადაც n არის ხეში კვანძების რაოდენობა
+
+ელემენტები ყოველთვის არიან უნიკალურები ანუ ორი ერთნაირი არ შეიძლება
+
+ანუ თუ ვეძებთ რაიმე ელემენტს პირველ რიგში შევხედავთ ფარენთ ნოუდს და შემდეგ წავალთ ან მარჯვნივ ან მარცხნივ და შემდეგ ისევ ესე სანამ არ მივაგნებთ, ამ მოძებნით ჩვენ ჩვენი ძებნის ტეპმს ვანახევრებთ
+
+ესეიგი თუ გვაქ მაგალითად 8 ელემენტი ანუ n=8 ესეიგი ჩვენ ჩვენი ძებნის ტემპი ჩამოგვყავს 4ზე შემდეგ 2ზე და ბოლოს ერთზე ანუ ხდება სამი გამეორება ზუსტად ამას ნიშნავს O(log n) ანუ log დაბლა 2 მაღლა 8 = 3 ანუ 3 შედარებული 8სთან არის log ორის ხარისხით
+
+თუ გინდა რომ მოძებნო რამე ამ ხეში ამისთვის არის ორი გზა Breadth first search და Depth first search
+
+Depth first search: ანუ აქ არის სამი გზა In order traversal, Pre order traversal, Post order traversal
+
+In order traversal: ამ დროს ჯერ მივაკითხავთ მარცხენა მხარეს შემდეგ ფარენთ ნოუდს და შემდეგ მარცხენა მხარეს ანუ თავიდან root node იდან მივდივართ მარცხნივ სუ ბოლოში და შემდეგ ვიწყებთ ამას, ანუ დასაწყისში ჩავდივართ მარა მერე აღარ მგონი არივცი ზუსტად
+
+Pre order traversal: ამდროს პირველ რიგში მივდივართ root nodeთან შემდეგ მარცხნივ შემდეგ მარჯვნივ
+
+Post order traversal: აქ ჯერ მივდივართ მარცხენივ შემდეგ მარჯვნივ ხოლო შემდეგ root nodeთან
+
+
+ანუ რაღაცნაირად უნდა ჩავახვეინოთ ეს ელემენტები შექმნის დროს დამატების დროს
+
+
+class Binary_Search_Tree:
+    def __init__(self, data):
+        self.data = data # ეს მგონი არის base node
+        self.left = None
+        self.right = None
+
+    def add_child(self, data):
+        # ანუ აქ ვჩეკავთ თუ მნიშვნელობა უკვე არსებობს
+        if data == self.data:
+            return
+
+        if data < self.data:
+            # ანუ მარცხნივ ვამატებთ რადგან პატარაა
+
+            # აქ ვამოწმებთ აქვს თუარა მარცხენა ელემენტს რაიმე მნიშვნელობა
+            # ანუ უნდა ჩავახვევინოთ recursive უნდა გავაკეთოთ იმიტო რომ ზოგადად BST ასეთი რამეა
+            # ანუ ეხლა აქ ასე იმიტომ ვშვები რომ ეს მარცხენა მხარე რომელიც არარის ცარიელი არის თავისმხრიმ პატარა subtree
+            # ანუ ჩავახვევინე და თავიდან დავაწყებინე
+            if self.left:
+                self.left.add_child(data)
+            else:
+                # ანუ თუ ცარიელია
+                self.left = Binary_Search_Tree(data)
+        else:
+            # აქ უკვე ვამატებთ რაღაცეებს იგივეებს მარჯვენა ხისთვის
+            if self.right:
+                self.right.add_child(data)
+            else:
+                # ანუ თუ ცარიელია
+                self.right = Binary_Search_Tree(data)
+
+    def in_order_traversal(self):
+        elements = []
+
+        # აქ ვამოწმებთ ჯერ მარცხენა მხარეს
+        if self.left:
+            elements += self.left.in_order_traversal()
+
+        # base nodeს
+        elements.append(self.data)
+
+        # მარჯვენა მხარე
+        if self.right:
+            elements += self.right.in_order_traversal()
+
+        return elements
+
+    def search(self, val):
+        if val == self.data:
+            return True
+
+        if val < self.data:
+            if self.left:
+                # ისევ რეკურსია
+                return self.left.search(val)
+            else:
+                # ანუ ბოლოში ვართ
+                return False
+
+        if val > self.data:
+            if self.right:
+                # ისევ რეკურსია
+                return self.right.search(val)
+            else:
+                # ანუ ბოლოში ვართ
+                return False
+
+def build_tree(elem):
+    root = Binary_Search_Tree(elem[0]) # ესეიგი აქ გვაქ base node
+
+    for i in range(1, len(elem)):
+        root.add_child(elem[i]) # და შემდეგ უკვე ვამატებთ დანარჩენებს თავის გზაზე
+
+    return root
+
+numbers = [17, 4, 6, 8, 25, 32, 12, 19, 19]
+# ამას ანბანის მიხედვით ვალაგებთ
+country = ["India", "UK", "USA", "Georgia", "France"]
+
+number_tree = build_tree(country)
+
+# ჩვეულებრივად გამოვა სტრინგზეც და რიცხვებზეც
+print(number_tree.in_order_traversal())
+print(number_tree.search("Sweden"))
+
+
+    def pre_order_traversal(self):
+        elements = []
+
+        elements.append(self.data)
+
+        if self.left:
+            elements += self.left.pre_order_traversal()
+
+        if self.right:
+            elements += self.right.pre_order_traversal()
+
+        return elements
+
+////////////////////////////////////////////////////////////////////
+    def post_order_traversal(self):
+        elements = []
+
+        if self.left:
+            elements += self.left.pre_order_traversal()
+
+        if self.right:
+            elements += self.right.pre_order_traversal()
+
+        elements.append(self.data)
+
+        return elements
+
+///////////////////////////////////////////////////////////////////
+
+    def find_min(self):
+        if self.left is None:
+            return self.data
+
+        return min(self.left.in_order_traversal())
+
+//////////////////////////////////////////////////////////////////
+    def find_max(self):
+        if self.right is None:
+            return self.data
+
+        return max(self.right.in_order_traversal())
+///////////////////////////////////////////////////////////////////
+
+    def calculate_sum(self):
+        right_sum = self.right.calculate_sum() if self.right else 0
+        left_sum = self.left.calculate_sum() if self.left else 0
+        return self.data + right_sum + left_sum
+//////////////////////////////////////////////////////////////////
+    def tree_size(self):
+        return len(self.in_order_traversal())
+
+
+//////////////////////////////////////////////////////////////////
+
+def delete(self, val):
+        if val < self.data:
+            if self.left:
+                self.left = self.left.delete(val)
+        elif val > self.data:
+            if self.right:
+                self.right = self.right.delete(val)
+        else:
+            if self.left is None and self.right is None:
+                return None
+            elif self.left is None:
+                return self.right
+            elif self.right is None:
+                return self.left
+
+            min_val = self.right.find_min()
+            self.data = min_val
+            self.right = self.right.delete(min_val)
+
+        return self

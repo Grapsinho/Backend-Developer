@@ -1,0 +1,93 @@
+CREATE TABLE branch (
+  branch_id INT PRIMARY KEY,
+  branch_name VARCHAR(40),
+  mgr_id INT,
+  mgr_start_date DATE,
+  FOREIGN KEY(mgr_id) REFERENCES employee(emp_id) ON DELETE SET NULL
+);
+
+ეხლა შევქმენით მაგიდა რომელსაც აქვს foreign key და ეს foreign key მიუთითებს იმაზე რასაც შემდგომ მივუთითებთ ON DELETE SET NULL ეს კი ნიშნავს რომ თუ მშობელ ცხრილში წაიშლება ის რაღაც მონაცემი მაშინ ეს მონაცემი შვილობილ ცხრილში დაყენდება NULL_ზე ხოლო თუ გვაქ ქივორდი NOT NULL ეს არ იმუშავებს თუ მაგალითად emp_id = 1 და mgr_id = 1 რამდენიმეგან თუ ჩვენ წავლშით emp_id მაშინ mgr_id დაყენდება როგორც NULL
+
+ALTER TABLE employee
+ADD FOREIGN KEY(branch_id)
+REFERENCES branch(branch_id)
+ON DELETE SET NULL;
+
+ALTER TABLE employee
+ADD FOREIGN KEY(super_id)
+REFERENCES employee(emp_id)
+ON DELETE SET NULL;
+
+ანუ თავიდანვე ჩვენ რო დაგვემატებინა ეს ორი ქოლუმნი არ გამოვიდოდა რადგან ჯერ შექმნილი არ იყო ეს მაგიდები და ქოლუმნები ასერომ ეხლა ვამატებთ ზუსტად იგივენაირად ჯერ foreign key მერე references და აქ ვუთითებთ იმ ქოლუმნს იმ მაგიდიდან რონელზეც გვინდა რომ მივუთითოთ ამ foreign key_ით
+
+
+CREATE TABLE works_with (
+  emp_id INT,
+  client_id INT,
+  total_sales INT,
+  PRIMARY KEY(emp_id, client_id),
+  FOREIGN KEY(emp_id) REFERENCES employee(emp_id) ON DELETE CASCADE,
+  FOREIGN KEY(client_id) REFERENCES client(client_id) ON DELETE CASCADE
+);
+
+ეხლა ჩვენ შვქმენით შემდეგი მაგიდა სადაც გვაქ ქომფოზიტ ქი ანუ ორი primary key და აქედან ორივე არის foreign  ON DELETE CASCADE ეს ნიშნავს რომ თუ ON DELETE SET NULL ის როუები კეთდებოდა NULL_ად აქ უბრალოდ იშლება
+
+
+-- Corporate
+INSERT INTO employee VALUES(100, 'David', 'Wallace', '1967-11-17', 'M', 250000, NULL, NULL);
+
+INSERT INTO branch VALUES(1, 'Corporate', 100, '2006-02-09');
+
+UPDATE employee
+SET branch_id = 1
+WHERE emp_id = 100;
+
+INSERT INTO employee VALUES(101, 'Jan', 'Levinson', '1961-05-11', 'F', 110000, 100, 1);
+
+მოკლედ ეხლა ვიწყებთ ამ ცხრილის შევსებას რადგან ჩვენს პირველ ცხრილს კონტაქტი აქვს მეორე ცხრილთან foreign დახმარებით პირველი ვავსებთ ერთ როუს და ბოლოში ვუტოვებთ NULL იმიტომ რომ ჯერ corporate არ შექმნილა ხოლო როცა შეიქმნა ამის შემდეგ დავამატეთ ჩვენი branch_id. ხოლო შემდეგ უკვე დავამატეთ მეორე როუც რომელიც ასევე უდრის branch_id 1 და ეგაა corporate 1 აქ დამთავრდა
+
+
+-- Scranton
+INSERT INTO employee VALUES(102, 'Michael', 'Scott', '1964-03-15', 'M', 75000, 100, NULL);
+
+INSERT INTO branch VALUES(2, 'Scranton', 102, '1992-04-06');
+
+UPDATE employee
+SET branch_id = 2
+WHERE emp_id = 102;
+
+INSERT INTO employee VALUES(103, 'Angela', 'Martin', '1971-06-25', 'F', 63000, 102, 2);
+INSERT INTO employee VALUES(104, 'Kelly', 'Kapoor', '1980-02-05', 'F', 55000, 102, 2);
+INSERT INTO employee VALUES(105, 'Stanley', 'Hudson', '1958-02-19', 'M', 69000, 102, 2);
+
+აქაც მსგავს რამეს ვაკეთებთ ხოლო ახლა უკვე სხვა ქოლუმნისთვის პირველად ვქმნით ჩვ  როუს რომელსაც ასევე branch_id ექნება NULL იმიტომ რომ scranton არ არის ჯერ შექმნილი ხოლო როდესაც შევქმენით უვკე დავამატეთ ეს ბრანჩ აიდი და ასევე სხვა employee_ბი
+
+
+-- Stamford
+INSERT INTO employee VALUES(106, 'Josh', 'Porter', '1969-09-05', 'M', 78000, 100, NULL);
+
+INSERT INTO branch VALUES(3, 'Stamford', 106, '1998-02-13');
+
+UPDATE employee
+SET branch_id = 3
+WHERE emp_id = 106;
+
+INSERT INTO employee VALUES(107, 'Andy', 'Bernard', '1973-07-22', 'M', 65000, 106, 3);
+INSERT INTO employee VALUES(108, 'Jim', 'Halpert', '1978-10-01', 'M', 71000, 106, 3);
+
+აქაც ზუსტად იგივე
+
+
+შეგვიძლია როდესაც მონაცემებს ვითხოვთ ქოლუმნებს უბრალოდ შევუცვალოთ სახელი ეს არმოახდენს გავლენას მაგიდაზე უბრალოდ როდესაც გამოვა მონაცემები ქოლლუმნს ერქმევა სხვა სახელი:  SELECT first_name AS forename, employee.last_name AS surname
+FROM employee;
+ესე
+
+SELECT CustomerName, Address + ', ' + PostalCode + ' ' + City + ', ' + Country AS Address
+FROM Customers;
+
+CONCAT(Address,', ',PostalCode,', ',City,', ',Country) ესე MySQL ისთვის
+
+ესე ვაერთებთ ერთმანეთთან რაღაც როუებს მაგალითადა ქ შევაერთეთ ეს 4 როუ და დავარქვით ქოლუმნს სახელი Address
+
+
+

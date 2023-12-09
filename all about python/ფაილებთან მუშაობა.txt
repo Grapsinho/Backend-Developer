@@ -1,0 +1,28 @@
+"r" = read უბრალოდ გვიპრინტავს ტერმინალში რაც წერია ფაილში
+"w" = write წერისთვის მაგრამ წინა ინფორმაცია წაიშლება
+"a" = append გამოიყენება ინფორმაციის დამატებისთვის
+"b" = binary
+"+" = read and write
+
+"rb" = read binary
+"wb" = write binary
+
+"r+" = read and write
+
+
+f = open("gio.txt", "rb")
+
+b = open("gio2.txt", "wb")
+
+b.write(f.read())
+
+f.close()
+b.close()
+
+ამის გამოყენებით ჩვენ შეგვიძლია გავაკეთოთ ფაილის კოპირება
+
+
+with open("gio.txt", "r+") as f:
+    print(f.read())
+
+მოკლედ ესე უფრო ცოტა ხაზზე შეგვიძლია იგივე რაღაცეების შესრულება და close არგვჭირდება აქ

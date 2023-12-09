@@ -1,0 +1,26 @@
+JOIN clause გამოიყენება ორი ან მეტი ცხრილის რიგების(row) გაერთიანებისთვის, მათ შორის დაკავშირებული სვეტის(column) საფუძველზე. 
+
+INNER JOIN(JOIN) აბრუნებს მხოლოდ იმათ რომლის მნიშვნელობებიც ემთხვევა
+
+LEFT (OUTER) JOIN აბრუნებს ყველაფერს მარცხენა(FROM რომელზეც გვიწერია) და იმ მნიშვნელობებს რომლებიც ემთხვევიან მარჯვენა ცხრილიდან
+
+RIGHT (OUTER) JOIN აბრუნებს ყველაფერს მარჯვენა (JOIN) ცხრილიდან და იმეებს რომლებიც ემთხვევიან მარცხენა ცხრილიდან
+
+FULL (OUTER) JOIN აბრუნებს ყველაფერს როდესაც არის დამთხვევა მარცხენა ან მარჯვენა ცხრილში ან მაინც აბრუნებს თუ არარის ანუ დებილობაა ეს რა
+
+select works_with.client_id, works_with.total_sales, client.client_name
+FROM works_with
+JOIN client  ეს არის INNER JOIN
+ON works_with.client_id = client.client_id
+
+აქ მე დავაკავშირე works_with client_თან თავიდან მივუთითე works_with.client_id იმიტომ რომ ზუსტად ამავე მნიშვნელობები აქვს იმ მეორე ცხრილსაც რომელთანაც ვაკავშირებთ foreign key_ებია ესენი ამიტომ ვუთითებთ მხოლოდ ერთს შემდეგ უკვე რეებიც გვინდა რომ მივიღოთ მე მინდა total_sales და client_name შემდეგ ამას ვიღებთ works_with ცხრილიდან და ვუკავშირდებით client_ს და იქიდან მოგვაქ ასევე მონაცემები ანუ თუ works_with.client_id = 100
+და client.client_id ესეც უდრის 100 მაშინ ჩვენ წამოვიღებთ ამავე როუებზე მყოფ works_with.total_sales, client.client_name ამეებს
+
+
+select branch.branch_name, AVG(employee.salary)
+FROM branch
+JOIN employee
+ON branch.branch_id = employee.branch_id
+GROUP BY branch.branch_name
+
+საშუალო ხელფასი ყველა დეპარტამენტში

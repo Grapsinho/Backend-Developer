@@ -1,0 +1,95 @@
+Project-Level Permissions:
+ეს არის ასერომვთქვათ გლობალური ფერმიშენები მთლიანი პროექტისთვის რომელსაც ვწერთ სეთინგ ფაილში
+
+REST_FRAMEWORK = {
+    # Other DRF settings...
+
+    # Define the default permission classes for all views
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Example permission
+        # Add more permissions as needed
+    ],
+
+    # Other DRF settings...
+}
+
+View-Level Permissions:
+ესენი უკვე ცალკეულ view ფუნქციებს ეძლევა
+
+permission_classes = [permissions.IsAuthenticated]
+
+
+Object-Level Permissions:
+
+
+
+1. AllowAny
+This permission class allows unrestricted access to the view or endpoint, meaning it doesn’t require authentication. All users, whether authenticated or not, can access the associated API views.
+
+2. IsAuthenticated
+This permission class restricts access to authenticated users only. Users must be logged in to access the view or endpoint protected by this permission.
+
+3. IsAdminUser
+This permission class restricts access to users who are marked as staff users in Django (user.is_staff). It allows access only to users who have the is_staff flag set to True.
+
+4. IsAuthenticatedOrReadOnly
+This permission class allows read-only access to authenticated users while permitting unauthenticated users to have read access as well. Authenticated users can perform write operations (e.g., POST, PUT, DELETE), while unauthenticated users are limited to read operations (e.g., GET).
+
+5. DjangoModelPermissions
+This permission class ties permissions to Django's model-level permissions. It requires authentication and then checks the user's permissions based on the model being accessed. For example, it might check if a user has the necessary permissions to perform CRUD operations on a specific model instance.
+
+6. DjangoModelPermissionsOrAnonReadOnly
+Similar to DjangoModelPermissions, this class also checks Django's model-level permissions for authenticated users. However, for unauthenticated users, it allows read-only access, similar to IsAuthenticatedOrReadOnly.
+
+7. DjangoObjectPermissions
+This permission class extends the object-level permissions in Django. It allows you to define custom permissions for individual objects and checks those permissions before granting access to a particular object instance. It's more fine-grained, allowing specific user-object permissions.
+
+
+
+
+
+როცა გვინდა ქოსთუმ ფერმიშენების გაწერა შეგვიძლია შევქმნათ ცალკე ფაილი ფერმიშენს და იქ გავწეროთ ჩვენი ფერმიშენები
+
+
+ეს არის ქოსთუმ ფერმიშენი რათა გავიგოთ მაგალითად პოსტი იმ იუზერს ეკუთვნის თუ არა რომელიც ცვლილებას აკეთებს
+from rest_framework import permissions
+
+
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    """
+    Custom permission to only allow owners of an object to edit it.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request
+                # ანუ ამით ვამოწმებთ ჰთთფ მეთოდი უსაფრთხოა თუ არა (GET, HEAD, OPTION)
+                # მოკლედ რომ ვთქვათ წაკითხვა შეეძლება მხოლოდ
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        # Write permissions are only allowed to the owner of the object
+        return obj.author == request.user
+
+
+ეს უკვე view ფუნქციაა კაირადა კლასი სადაც ვიყენებთ ამას რათქმაუნდა ჯერ უნდა იმპორტი გავუკეთოთ
+permission_classes = [IsOwnerOrReadOnly]
+
+    # Optionally, you can override the permission check for specific actions
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [IsAuthenticated()]
+        return super().get_permissions()
+
+
+
+
+
+
+
+
+
+
+
+
+
+

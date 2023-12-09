@@ -1,0 +1,37 @@
+DELIMITER $$
+CREATE 
+TRIGGER my_trigger before insert
+ON employee
+FOR EACH ROW BEGIN
+     INSERT INTO trigger_table VALUES("added new item");
+END $$
+DELIMITER ;
+
+მოკლედ ეს არის ტრიგგერი ჩვენ ეხლა განვსაზღვრეთ ტრიგერი
+
+რას აკეთებს ეხლა ეს პირველ რიგში ვქმნით triggers ვარქმევთ სახელს და ვეუბნებით რამეს მაგალითად აქ წერია სანამ employee ცხრილში რამეს შევიტანთ ამდროს trigger_table_ში დაემატება მნიშვნელობა ის რაც გვინდა რათქმაუნდა ესეც შექმნილი უნდა იყოს ეს ცხრილი ცალკე trigger_table
+
+delimiter ნიშნავს ანუ იგივე ; ეს არის თუმცა ჩვენ ; ნიშანი გვჭირდება როდესაც რაღაც მნიშნველობა შეგვაქ მაგიდაში ასერომ შემდეგ უკვე აღარ შეგვიძლია ასეთივე ; ნიშანი გამოვიყენოთ ჩვენი ტრიგერისთვის END $$ თან. ანუ $$ ამით ჩვენ განვსაზღვრეთ ; ეს რომ იყოს $$ ესენი და ბოლოში ისევ ; ამათ გადავაკეთეთ
+
+NEW.ქოლუმნის სახელი და ამოგვიგდებს იმ ქოლუმნს რომელიც ახალხანს შეივტანეთ იმ ცხრილის ქოლუმნს
+
+
+DELIMITER $$
+CREATE 
+TRIGGER my_trigger1 before insert
+ON employee
+FOR EACH ROW BEGIN
+     IF NEW.sex = 'F' THEN
+         INSERT INTO trigger_table VALUES('added female employee');
+	 ELSEIF NEW.sex = 'M' THEN
+         INSERT INTO trigger_table values('added male employee');
+	 ELSE
+         INSERT INTO trigger_table VALUES('added employee');
+	 END IF ;
+END $$
+DELIMITER ;
+
+ეს კიდე ჩვ if else statement
+
+DROP trigger ჩვენი ტრიგერის სახელი 
+და ამით ვშლით ტრიგერს

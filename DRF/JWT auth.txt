@@ -1,0 +1,5 @@
+პირველ რიგში ვიწერთ ამას
+pip install djangorestframework-simplejwt
+
+და იმ რესთ ფრეიმვორკის ლისტში ვამატებთ ამას
+"rest_framework_simplejwt.authentication.JWTAuthentication",

@@ -1,0 +1,119 @@
+ეს არის view ფუნქცია
+
+# ამით ვქმნით იუზერს
+class SignUpView(generics.GenericAPIView):
+    serializer_class = UserSerializer
+    permission_classes = []
+
+    def post(self, request: Request):
+        data = request.data
+        serializer = self.serializer_class(data=data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            response = {"message": "User Created", "data": serializer.data}
+
+            return Response(data=response, status=status.HTTP_201_CREATED)
+
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+ეს არის სერიალაიზერი
+
+class UserSerializer(serializers.ModelSerializer):
+    # Define serializer fields for email, username, and password
+    email = serializers.CharField(max_length=80)
+    username = serializers.CharField(max_length=45)
+    password = serializers.CharField(min_length=8, write_only=True)  # Password won't be included in serialized output
+
+    class Meta:
+        model = User
+        fields = ["email", "username", "password"]  # Fields to include in the serializer
+
+    # Validate method to check if the email already exists in the database
+    def validate(self, attrs):
+        email_exist = User.objects.filter(email=attrs["email"]).exists()
+        if email_exist:
+            raise ValidationError("Email has already been used")  # Raise an error if the email is already in use
+        return super().validate(attrs)
+
+    # Create method to handle the creation of a new user
+    def create(self, validated_data):
+        password = validated_data.pop("password")  # Extract the password from validated data
+        user = super().create(validated_data)  # Create a new user instance
+        user.set_password(password)  # Set the user's password using set_password for encryption
+        user.save()  # Save the user instance with the updated password
+        Token.objects.create(user=user)  # Create a token for the new user
+        return user  # Return the created user instance
+
+თუ ამეებს ტოკენის შექმნას გამოვაკლებთ ჩვეულებრივად შეგვიძლია შევქმნათ იუზერი
+
+
+Token Authentication:
+
+"rest_framework.authtoken" პირველ რიგში ამას ვამატებთ ინსტალედ აპებში
+
+შემდეგ ისევ სეთინგებში ვქმნით ამას ნუ თუ უკვე არგვაქ შექმნილი ფერმიშენებისთვის
+
+DEFAULT_AUTHENTICATION_CLASSES აქ ვამატებთ ჩვენს სასურველ აუთენთიფიკაციის კლასებს
+
+REST_FRAMEWORK = {
+    # აქ კი არის აუთენთიფიკაციის კლასები
+    # რესთ ფერიმოვორკი ცდის ყველა მათგანს სანამ წარმატებული აუთენთიფიკაცია არ მოხდება
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    # და აქ ანუ ნებართვას ვაძლევთ მხოლოდ დარეგისტრირებულ იუზერებს
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated"),
+}
+
+შემდეგ გადავდივართ სერიალაიზერ კლასში და ვწერთ ამეებს
+from rest_framework.authtoken.models import Token
+
+და უბრალოდ სადაც იუზერს ვქმნთ ბოლოში რეთრნამდე ვუწერთ ამას
+Token.objects.create(user=user)
+
+
+ეს view ფუნქცია
+
+class LoginView(APIView):
+    permission_classes = []
+
+    def post(self, request: Request):
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        user = authenticate(password=password, email=email)
+
+        if user is not None:
+            response = {
+                "message": "user login successful",
+                "token": user.auth_token.key,
+            }
+
+            return Response(data=response, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                data={"message": "email or password is invalid"},
+            )
+
+    def get(self, request: Request):
+        # ანუ დარეგისტრირებული და დალოგინებული იუზერიდან ვიღებთ ამ ორს
+        content = {"user": str(request.user), "auth": str(request.auth)}
+
+        return Response(data=content, status=status.HTTP_200_OK)
+
+ასე ვუქმნით იუზერს ტოკენს და შემდეგ ეს ტოკენი შეგვიძლია გმაოვიყენოთ იუზერის დასარეგისტრირებლად
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,89 @@
+----------Model Inheritance--------
+ესეიგი შეგვიძლია ჯანგოში გავაკეთოთ ისე რომ რამოდენიმე მოდელი დავაკავშიროთ ერთმანეთთან ამის 3 გზა არსებობს
+
+1) Abstract Model მოკლედ ამ კავშირის დროს თავდიან ვქმნით base კლასს ანუ მოდელს რომლეიც არ იქნება დატაბეიზში ის მხოლოდ იმ გამოჩნდება შვილობილ მოდელებთან ანუ მაგალითად:
+
+    class CommonInfo(models.Model):
+        name = models.CharField(max_length=100)
+        age = models.PositiveIntegerField()
+
+        აქ განვსაზღვრავთ რომ ეს არის აბსტრაქტი
+        class Meta:
+            abstract = True
+
+
+    class Student(CommonInfo):
+        home_group = models.CharField(max_length=5)
+
+ანუ ეხლა სტუდენტს ექნება ყველაფერი რაც აქვს ქომონინფოს მაგრამ ეს არ გამოჩნდება დატაბეიზში იქნება მხოლოდ სტუდენტი
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+
+როდესაც გვაქ რაიმე სახის ურთიერთობა მოდელებს შორის ამ დროს შეგვიძლია მივუთითოთ რა მოუვა მოდელს თუ წაიშლება ესა თუ ის მოდელი
+
+.SET_DEFAUL ანუ თუ გვაქ რაიმე დეფაულტი მითითებული მაშინ ის გახდება ეს დეფაულტი
+.PROTECT უბრალოდ არ წაშლის დაიცავს
+.SET(function) ამის შიგნით შეგვიძლია ჩავწეროთ ფუნქცია და ის ამ ფუნქციას გამოიძახებს წაშლის შემდეგ, ანუ თუ მაგალითად ფუნქცია აბრუნებს 2ს მაშინ იმ მოდელს რომელსაც რაღაც უნდა მოუვიდეს დაუკავშირდება სხვა მოდელს რომელსაც ექნება იდ 2
+
+
+
+MPTT MODEL:
+
+ესეიგი მფთთი მოდელი აკეთებს ასეთ რამეს ანუ როდესაც მაგალითად გვაქ 
+კომენტარების სექცია და დავწერეთ რაღაც კომენტარი ვიღაცას ხო შეუძლია რო 
+დაგვირეფლიოს კომენტარზე ხოდა ზუსტად ისე მოხდება რომ სხვა ადამიანს და ასევე ჩვენც შეგვეძლება გარჩევა რომელ კომენტარზე დაგვირეფლიეს პატარათი შეწეული იქნება მისი დარეფლიებული ასე მუშაობს მფთთ 
+
+ესეიგი როდესაც დავწერთ რამე კომენტარს ეს იქნება ფარენთ კომენტარი და ვიღაც
+რო დაგვირეფლიებს ეგ იქნება შვილი კომენტარი ასერომ რაღაცნაირ კავშირს ვქმნით
+
+
+
+ტაიტელს ვიყენებთ სლაგად
+def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
+
+
+
+many-to-many link relationship:
+
+პრობლემა: მოკლედ ასეთი ურთიერთობა აგვარებს ისეთ პრობლემებს როგირცაა მონაცემების დუბლირება და ეს ქმინს კიდევ ცალკე პრობლემას ეს არის კომპლექსური ქუერიები ასერომვთქვათ ანუ მაგალითად როდესაც სტუდენტები არიან ჩარიცხული ერთიდა იგივე კურსზე ეს კურსები დატაბეისში მეორდება ანუ მარტივად რომ ვთქვათ ასეთი რამე არ შეიძლება
+
+
+აი მსგავსი რამე ხდება
+
+Student_ID	Name	Enrolled_Courses
+1	                Alice	 Math, Science
+2	                Bob	 Science, History
+3	                Charlie	 Math, History
+
+
+
+from django.db import models
+
+class Student(models.Model):
+    name = models.CharField(max_length=100)
+    courses = models.ManyToManyField('Course', through='Enrollment')
+
+class Course(models.Model):
+    course_name = models.CharField(max_length=100)
+
+class Enrollment(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    enrollment_date = models.DateField()
+    grade = models.CharField(max_length=2)
+
+
+alice = Student.objects.get(name='Alice')
+enrolled_courses = alice.courses.all()
+
+# Query for students enrolled in the "Math" course
+math_students = Student.objects.filter(courses__course_name='Math')
+
+
+

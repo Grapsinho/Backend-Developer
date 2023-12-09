@@ -1,0 +1,3 @@
+მოკლედ თუ მოდულებში შევცვლით რამეს მაშინ გვჭირდება მათი გადატვირთვა importlib.reload(), e.g. import importlib; importlib.reload(modulename).
+
+ესეთი რაღაცით

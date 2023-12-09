@@ -1,0 +1,121 @@
+POST რათა გავგზავნოთ ინფორმაცია
+
+როდესაც ვქმნით ფორმს საჭიროა რომ ფორმის შიგნით ჩავწეროთ ეს {% csrf_token %} ანუ ამას მგონი რაღაც დამცველობითი ფუნქცია აქვს რომ რაღაც ცუდი მონაცემები არ შემოიყვანოს იუზერმა
+
+ესეიგი თუ გვინდა რომ შევქმნათ ფორმები ჩვენს ცხრილთან რომელიც იქნება დაკავშირებული ანუ რაც ცხრილში იქნება ის ჩასაწერები რო გამოჩნდეს ჯერ ვქმნით ჩვენს აპპ ფოლდერში forms.py შემდეგ ვაიმპორტებთ ამას from django.forms import ModelForm ხოლო შემდეგ იმ მოდელებს რომლის იდენტრუიც გვინდა რომ გავაკეთოთ from .models import Room მაგალითად
+
+class RoomForm(ModelForm):
+    class Meta:
+        model = Room #ის ცხრილი რომლისთვისაც გვინდა რომ შევქმნათ ფორმი
+        fields = '__all__' # ანუ შექმნის ყველა ჩამოწერილი ქოლუმნისთვის ფორმის ელემენტებს
+        # ხოლო შეგვიძლია შევქმნათ ლისტი და ამ ლისტში ჩავწეროთ ის რაღაცეები რისთვისაც გვინდა რომ შეიქმნას იმ ქოლუმნის სახელები
+
+ხოლო შემდეგ გადავდივართ viewsში და ვაიმპორტებთ ამას from .forms import RoomForm იმ ფორმს რომელიც შევქმენით შემდეგ ამ ფორმას გადავცემთ რაღაც ცვლადს მაგალითად fields = RoomForm() და ბოლოს ვსვავთ კონტექსტში context = {"fields": fields}
+
+<form action="" method="post">
+        {{fields.as_p}}
+
+        <input type="submit" value="Submit" />
+      </form>
+
+
+
+if request.method == 'POST':
+        print(request.POST)
+
+ასე შეგვიძლია ვნახოთ ჩვენი მონაცმეები რაც შევიყვანეთ ამ ფორმში ამას ვწერთ viewsში
+
+def roomPage(request):
+    fields = RoomForm()
+
+    if request.method == 'POST':
+        form = RoomForm(request.POST) # მონაცემებს ვამატებთ formში
+        if form.is_valid(): # ვამოწმებთ რამე ცუდი ხოარააა
+            form.save() # ვასეივებთ
+            return redirect('home') # და გადავდივართ ჰოუმ ფეიჯზე როცა დავაწვებით სუბმიტს from django.shortcuts import render, redirect
+
+    context = {"fields": fields}
+    return render(request, 'playground/room_page.html', context)
+
+ესეიგი როდესაც ჰოსტს ამოვიღებთ ჩვენი შესავსები სიიდან საჭიროა რომ 
+
+nameHs = form.save(commit=False)
+            nameHs.host = request.user
+            nameHs.save()
+
+ასეთი რამე გავაკეთოთ რათა რომელი იუზერიც იქნება შესული ფეიჯზე მისი სახელით გაკეთედეს ჯგუფი და არა ჩვენთითონ ავირჩიოთ ეგ
+
+
+მოკლედ ეს რომ დავამატოთ რომელიმე მოდელის კლასში რომელში გვინდა შეგვიძლია დავალაგოთ აითემები რაღაც ორდერით
+
+    class Meta:
+        ordering = ['-updated', '-created'] # ანუ ახალ შექმნილ რუმებს ვალაგებთ desc ორდერით იმიტომ რომ ბოლოს შექმნილი რუმი მოხვდეს თავში და ასშ...
+
+
+
+
+/////////////////////////////UPDATE////////////////////////////////
+
+მოკლედ რათა დავააბდეითოთ ჩვენი რუმები და რაღაც ცვლილებები შევიტანოთ ვაკეთებთ შემდეგ რაღაცეებს
+
+ეს უნდა ჩავწეროთ ვიევსში
+
+def updateRoom(request, pk):
+    room = Room.objects.get(id=pk)
+    form = RoomForm(instance=room) # ანუ ეს ფორმ შეივსება წინასწარ ამ როომით
+
+    if request.method == 'POST':
+        form = RoomForm(request.POST, instance=room) # ეს ინსტენსი იმიტომ რომ ვიცოდეთ რომელ რუმს ვააბდეითებთ და ახალი რუმი კიარ შექმნას ის დააბდეითოს
+        if form.is_valid(): # ვამოწმებთ რამე ცუდი ხოარააა
+            form.save() # ვასეივებთ
+            return redirect('home') # და გადავდივართ ჰოუმ ფეიჯზე როცა დავაწვებით სუბმიტს
+
+    context = {'fields': form}
+
+    return render(request, 'playground/room_page.html', context)
+
+ურლში ვუთითებთ უბრალოდ ფაზს
+
+path('update_room/<str:pk>/', views.updateRoom, name='updateRoom')
+
+და ჰტმლში ამას რათა გადავიდეთ კონკრეტულად იმ რუმზე რომელზეც დავაწკაპებთ
+<a href="{% url 'updateRoom' room.id %}">Edit</a>
+
+ამით ვაკეთებთ updateს
+
+
+///////////////////////////DELETE////////////////////////////////////
+
+ესეიგი viewს ში მარტივად ვამატებთ ამ ფუნქციას
+
+def deleteRoom(request, pk):
+    room = Room.objects.get(id = pk)
+
+    if request.method == 'POST':
+        room.delete()    # და ნუ მოკლედ უბრალოდ წავშალეთ ის რუმი
+        return redirect('home')
+
+    return render(request, 'playground/delete_room.html', {'obj': room})
+
+
+ჰტმლში გვჭირდება ესეთი ფორმა
+
+<div>
+      <form action="" method="POST">
+        {% csrf_token %}
+
+        <p>are you sure you want to delete this {{obj}} room?</p>
+        <!--გაგზავნის იუზერს იქ საიდანაც მოვიდა-->
+        <a href="{{request.META.HTTP_REFERER}}">Go Back</a>
+        <input type="submit" value="Confirm" />
+      </form>
+    </div>
+
+
+ურლში ჩვეულებრივად ვამატებთ ფაზს
+
+path('delete_room/<str:pk>/', views.deleteRoom, name='deleteRoom')
+
+და ჰოუმ ფეიჯზე ესეთ ლინკს
+
+<a href="{% url 'deleteRoom' room.id %}">Delete</a>

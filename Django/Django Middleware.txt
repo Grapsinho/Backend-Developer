@@ -1,0 +1,225 @@
+მიდლვეარები ასერომვთქვათ არიან ვებ სერვერსა და viewს შორის ანუ როდესაც იუზერი აკეთებს რაიმე რექვესთს ეს რექვესთი გაივლის მიდლვეარებს და ასევე პასუხის დროსაც გამოივლის მიდლვეარებს ხოლო ეს მიდლვეარები სხვადასხვა სახისაა და სხვადასხვა რამეს ასრულებენ
+
+CSRF middleware ეს დამცველია მაგალითად
+
+ასევე გამოიყენება მიდლვეარები ქეშინგისთვის აუთენთიკაციისთვის და კიდევ ბევრი რამისთვის
+
+class MyMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # This method is called when the middleware instance is created.
+        # 'get_response' is a callable that represents the next middleware or view function.
+        # You can store it as an instance variable for later use.
+
+    def __call__(self, request):
+        # This method is called for each request.
+        # You can process the request here before passing it to the next middleware or view.
+        response = self.get_response(request)
+        # Process the response here, if needed.
+        return response
+
+ასე შეგვიძლია შევქმნათ მიდლვეარი
+
+
+
+capture user data:
+
+ეს გამოიყენება მონაცემთა ველების განახლებისთვის
+from django.db.models import F
+from .models import newstats
+
+class DemoMiddleware:
+
+  def __init__(self, get_response):
+    self.get_response = get_response
+
+
+     ვიღებთ ინფორმაციას და შესაბამისად ვანაწილებთ ჩვენს დატაბეიზში
+     ესენი არის დატაბეიზის ფიელდები
+  def stats(self, os_info):
+    if "Windows" in os_info:
+        newstats.objects.all().update(win=F('win') + 1)
+    elif "mac" in os_info:
+        newstats.objects.all().update(mac=F('mac') + 1)
+    elif "iPhone" in os_info:
+        newstats.objects.all().update(iph=F('iph') + 1)
+    elif "Android" in os_info:
+        newstats.objects.all().update(android=F('android') + 1)
+    else:
+        newstats.objects.all().update(oth=F('oth') + 1)
+
+
+  def __call__(self, request):
+
+        ესეიგი თუ ურლში იქნება ადმინი გამოყენებული მაშინ არ ვუშვებთ ამ ხაზს
+        ეს ხაზი აგროვებს იუზერის მოწყობილობის შესახებ ინფორმაციას და აგზავნის stats ფუნქციაში
+    if "admin" not in request.path:
+      self.stats(request.META['HTTP_USER_AGENT'])
+
+    response = self.get_response(request)
+
+    return response
+
+
+models:
+class newstats(models.Model):
+  win = models.IntegerField()
+  mac = models.IntegerField()
+  iph = models.IntegerField()
+  android = models.IntegerField()
+  oth = models.IntegerField()
+
+
+admin:
+import json 
+
+from django.contrib import admin
+
+from django.core.serializers.json import DjangoJSONEncoder
+from django.core import serializers
+
+from .models import newstats
+
+@admin.register(newstats)
+class NewStatsAdmin(admin.ModelAdmin):
+
+    def changelist_view(self, request, extra_context=None):
+          
+        აქ ესეიგი მოგვაქვს ინფორმაცია ამ ფიელდებიდან
+        stat_data = (
+            newstats.objects.annotate().values("win","mac","iph","android","oth")
+        )
+
+        # data = newstats.objects.all()
+        # newdata = serializers.serialize('json', list(data), fields=("win","mac","iph","android","oth"))
+        # print(newdata)
+
+                აქ უკვე ჯსონის სტრინგად გადაყვავს ჩვენი ინფორმაცია
+        as_json = json.dumps(list(stat_data), cls=DjangoJSONEncoder)
+
+                აქ ვინახავთ
+        extra_context = extra_context or {"stat_data": as_json}
+
+        return super().changelist_view(request, extra_context=extra_context)
+
+ხოლო მოკლედ რომ ვთქვათ ამ ყველაფრით ჩვენ ადმინ ინტერფეისში ვაშენებთ ჩართებს და ისე გამოვსახავთ სტატისტიკას
+
+ხოლო ამ ყველაფერს ვუგზავნით თამფლეითს ურლს მიხედვით მაგალითად გაკვეთილს რასაც ვუყურე ასეთი ლინკი იყო admin/demo_middleware/newstats/, ზუსტად ასეთ ფაილს ვაკეთებთ და შიგნით ვაკეთებთ თამფლეითს რომელსაც მიუვა ჩვენი ინფორმაცია
+
+
+HTML template:
+
+აქ უბრალოდ ვიღებთ ინფორმაციას და საიტი chart.jsის ნაირად ვაკეთებთ რაღაცეებს
+
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.2.1/Chart.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ctx = document.getElementById('myChart').getContext('2d');
+
+  const chartData = {{ stat_data | safe }};
+
+  let arr = []
+
+  for (let value of Object.values(chartData[0])) {
+    arr.push(value); 
+  }
+
+  // Render the chart
+  const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Windows', 'Mac', 'Iphone', 'Android', 'Other'],
+      datasets: [{
+            label: '# of Visits',
+            data: arr,
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+    scales: {
+        yAxes: [{
+            ticks: {
+                beginAtZero: true
+            }
+        }]
+    }
+},
+  });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Render our chart -->
+<div style="width: 100%;">
+  <canvas style="margin-bottom: 30px; width: 60%; height: 50%;" id="myChart"></canvas>
+</div>
+<!-- Render the rest of the ChangeList view -->
+{{ block.super }} ამით უბრალოდ დანარჩენ რაღაცეებიც გადმოგვაქ რაც ადმინ ინტერფეისშია
+{% endblock %}
+
+
+
+ეს ფუნქცია გამოიძახება მანამ სანამ ჯანგო მოცელმულ HTTP requestზე გამოიძახებს რომლიმე view ფუნქციას
+def process_request(self, request):
+        # This method is called at the beginning of the request processing.
+        # You can perform actions or checks on the request here.
+        pass
+
+ეს ფუნქცია გამოიძახება მას შემდეგ როცა ჯანგო განსაზღვრავს რომელი view ფუნქცია უნდა შეასრულოს მაგრამ მანამდე სანამ ეს view ფუნქცია გამოიძახება
+def process_view(self, request, view_func, view_args, view_kwargs):
+        # This method is called before the view function is executed.
+        # You can inspect or modify the view function's arguments here.
+        ასე მაგალთად ვპრინტავთ view ფუნქციის სახელს
+        print(f'view name: {view_func.__name__}')
+
+ეს გამოიძახება მოთხოვნის დამუშავებისას, ეს გამოგვადგება რაღაცა ერორების დროს
+class MyMiddleware:
+    def process_exception(self, request, exception):
+        # This method is called when an exception occurs during request processing.
+        # You can handle the exception or log errors here.
+        pass
+
+ეს გამოიძახება მაშინ როდესაც ასერომვთქვათ უკვე დაგენერირებულია თამფლეითი viewს მიერ და სანამ ეს მიუვა კლიენტს
+class MyMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.context_response = {
+            "msg": {"warning": "some Text"}
+        }
+
+ასე გავგზავნით ტექსტს ჩვენს თემფლეითთან
+    def process_template_response(self, request, response):
+        # This method is called after a template response is generated.
+        # You can manipulate or add content to the response here.
+        response.context_data["new_data"] = self.context_response
+        return response
+
+
+ასე უკვე გამოვიტანთ ჩვენს ჰტმლში ჩვენს ტექსტს
+HTML:
+<div id="template"></div>
+
+{{ new_data/json_script:"new_data" }}
+
+<script>
+    var test = JSON.parse(document.getElementById('new_data').textContent).msg.warning
+    document.getElementById("template").innerHTML = test
+</script>
+  
+

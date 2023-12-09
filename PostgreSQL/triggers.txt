@@ -1,0 +1,80 @@
+ტრიგერები გამოიყენება მაშინ, როდესაც გსურთ, რომ მოქმედება ავტომატურად მოხდეს, როდესაც მოხდება მოვლენა. გავრცელებული მოვლენები მოიცავს ბრძანებებს ჩასმა, განახლება, წაშლა და შეკვეცა. ტრიგერები ასევე შეიძლება ასოცირებული იყოს ცხრილებთან, უცხო ცხრილებთან ან ხედებთან.
+ტრიგერები შეიძლება შესრულდეს მოვლენის შესრულებამდე ან მის შემდეგ. ტრიგერები ასევე შეიძლება შესრულდეს სხვა მოვლენის ნაცვლად.
+შეგიძლიათ მაგიდაზე განათავსოთ მრავალი ტრიგერები და ისინი შეასრულონ ანბანური თანმიმდევრობით. მათი ხელით გაშვება მომხმარებლის მიერ შეუძლებელია. ტრიგერები ასევე ვერ იღებენ პარამეტრებს.
+
+
+ასე იქმნება ტრიგერ ფუნქცია:
+CREATE FUNCTION trigger_function()
+	RETURNS TRIGGER
+	LANGUAGE PLPGSQL
+AS
+$body$
+BEGIN
+END;
+$body$
+
+
+ასე იქმნება ტრიგერი:
+CREATE TRIGGER trigger_name
+	{BEFORE | AFTER} {event} -- Event : insert, update, insert
+ON table_name
+	[FOR [EACH] {ROW | STATEMENT}]
+		EXECUTE PROCEDURE trigger_function
+
+
+
+
+-- Create trigger function
+CREATE OR REPLACE FUNCTION fn_log_dist_name_change()
+	RETURNS TRIGGER
+	LANGUAGE PLPGSQL
+AS
+$body$
+BEGIN
+	-- If name changes log the change
+                თუ იქნება რაიმე ცვლილება მაშინ ჩვენ ამ ცვლილებებს შევინახავთ სხვა ცხრილში მაგალითად 
+                distributor_audit ამ შემთხვევაში
+                ეხლა ჩვენ შევინახეთ ძველი სახელი აიდი და დრო ოღონც ეხლანდელი ანუ როცა აბდეითი გაკეთდა
+	IF NEW.name <> OLD.name THEN
+		INSERT INTO distributor_audit
+		(dist_id, name, edit_date)
+		VALUES
+		(OLD.id, OLD.name, NOW());
+	END IF;
+	
+	-- Trigger information Variables
+	RAISE NOTICE 'Trigger Name : %', TG_NAME;
+	RAISE NOTICE 'Table Name : %', TG_TABLE_NAME;
+	RAISE NOTICE 'Operation : %', TG_OP;
+	RAISE NOTICE 'When Executed : %', TG_WHEN;
+	RAISE NOTICE 'Row or Statement : %', TG_LEVEL;
+	RAISE NOTICE 'Table Schema : %', TG_TABLE_SCHEMA;
+	
+	-- Return the updated new data
+	RETURN NEW;
+END;
+$body$
+
+
+
+-- Bind function to trigger
+CREATE TRIGGER tr_dist_name_changed
+	-- Call function before name is updated
+	BEFORE UPDATE 
+	ON distributor
+	-- We want to run this on every row where an update occurs
+	FOR EACH ROW
+	EXECUTE PROCEDURE fn_log_dist_name_change();
+
+-- Update distributor name and log changes
+UPDATE distributor
+SET name = 'Western Clothing'
+WHERE id = 2;
+
+-- Check the log
+SELECT * FROM distributor_audit; 
+
+
+
+
+

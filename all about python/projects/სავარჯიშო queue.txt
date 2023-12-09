@@ -1,0 +1,41 @@
+import threading
+import time
+
+from collections import deque
+
+
+costumers = ['pizza', 'samosa', 'pasta', 'biryani', 'burger']
+
+
+def order():
+    queue = deque()
+
+    for customer in costumers:
+        queue.append(customer)  #უბრალოდ ავფენდე ეს ლისტი ქუეუეში
+
+    while queue:
+        customer = queue.popleft()  # აქ ვეუბნები რომ ნელნელა ამოვარდეს ლისტიდან პირველი ელემენტი
+        print(f"your {customer} serving")
+        time.sleep(0.5)
+
+
+#აქ იგივეებია
+def serving():
+    time.sleep(1)
+    queue = deque()
+
+    for customer in costumers:
+        queue.append(customer)
+
+    while queue:
+        customer = queue.popleft()
+        print(f"your {customer} done")
+        time.sleep(2)
+
+
+# და აქ უბრალოდ ორივე ერთ ხაზზე(thread) გავუშვი
+start_time = threading.Thread(target=order)
+start_time1 = threading.Thread(target=serving)
+
+start_time.start()
+start_time1.start()

@@ -1,0 +1,7 @@
+git rebase branch name და ამით შეგვიძლია გავაკეთოთ მერჯი ისე რომ არ მოგვიხდეს მაგალითად ახალი დამატებითი ქომითის შექმნა ანუ აუტო მერჯინი რომ არ გავაკეთოთ ისე მარტივად ემატება ქომითები
+
+pick: Keeps the commit as is.
+reword: Allows you to edit the commit message.
+edit: Pauses rebase to let you make changes to the selected commit.
+squash/fixup: Combine a commit with the previous one or another specified commit, allowing you to merge commits together.
+drop: Removes the commit from the history.

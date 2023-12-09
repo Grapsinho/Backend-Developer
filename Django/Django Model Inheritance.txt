@@ -1,0 +1,93 @@
+პირველი არის აბსტრაქტული
+
+1)ამ მოდელის დროს ჯანგო არ ქმნის დამატებით მოდელს ანუ ჩვენი აბსტრაქტული მოდელი არ გამოჩნდება
+
+class Product(models.Model):
+    common_field = models.CharField(max_length=100)
+    
+    class Meta:
+        abstract = True
+
+class Book(AbstractBase):
+    name = models.CharField(max_length=100)
+
+ანუ ეხლა book მოდელს ექნება common_fieldიც და nameიც
+
+class AbstractBase(models.Model):
+    common_field = models.CharField(max_length=100)
+    
+    class Meta:
+        abstract = True
+        ordering = ['common_field']
+
+class ConcreteModelA(AbstractBase):
+    specific_field_a = models.IntegerField()
+
+    class Meta:
+        ordering = ['specific_field_a']
+
+ესე ვაკეთებთ მეტა კლასებს როცა გვჭირდება დავამატოთ ცალკე ფუნქციონალი ან რამე მაგალითად ეხლა როცა ჩვენ ბეის კლასში დავწერეთ ordering = ['common_field'] თუ ჩვენ ჩვენს შემდეგ კლასში რომლეიც არის ბეის კლასის საბკლასი, საბკლასის Meta კლასი გადაეწერება ბეის კლასის მეტა კლასს 
+
+თუ გვინდა რომ გადმოვიღოთ ბეის კლასის ფუნქციონალი საბკლასებში უნდა ვქნათ ასეთი რამე
+
+class Meta(AbstractBase.Meta):  # Inherit Meta class from AbstractBase.Meta
+        verbose_name = 'Custom Model'
+
+
+proxy models
+
+ესეიგი ამით ძირითადად ვამატებთ ფუნქციონალს ან რაღაც მეთოდებს ჩვენს რომელიმე მოდელს
+
+პროქსი მოდელი მემკვიდრეობით იღებს ორიგინალური მოდელის ყველა ველს, მეთოდს და ქცევას. ეს მოიცავს ველებს, მეთოდებს, მენეჯერებს და ორიგინალურ მოდელში განსაზღვრულ ნებისმიერ მორგებულ ლოგიკას.
+
+
+
+class OriginalModel(models.Model):
+    field = models.CharField(max_length=100)
+
+class ProxyModel(OriginalModel):
+    class Meta:
+        proxy = True
+
+    def custom_method(self):
+        return f"Custom method for {self.field}"
+
+ანუ მაგალითად აქ ჩვენ ასერომვთქვათ ამ ProxyModel მოდელს ვაერთებთ მთავარ მოდელთან და შემდეგ ვამატებთ ფუნქციონალს custom_method 
+
+პროქსი მოდელები კარგი იქნება მაგალითად როდესაც გვჭირდება რომ იუზერ მოდელს დავამატოთ რაიმე ფუნქციონალი
+
+პროქსი მოდელის მაგალითი
+
+from django.contrib.auth.admin import User
+
+class PersonManagerInactive(models.Manager):
+    def get_queryset(self):
+        return super(PersonManagerInactive, self).get_queryset().filter(is_active=False)
+
+class PersonManagerActive(models.Manager):
+    def get_queryset(self):
+        return super(PersonManagerActive, self).get_queryset().filter(is_active=True)
+
+class Person(User):
+
+    inactive = PersonManagerInactive()
+    active = PersonManagerActive()
+
+    class Meta:
+        proxy = True
+        ordering = ('first_name',)
+
+    @classmethod
+    def count_all(cls,):
+        return cls.objects.filter(is_active=True).count()
+
+    def check_active(self):
+        if self.is_active == True:
+            return "You are Active!"
+        else:
+            return "You are not Active!"
+
+    def __str__(self):
+        return self.first_name
+
+

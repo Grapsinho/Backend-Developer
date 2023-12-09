@@ -1,0 +1,10 @@
+WITH sum_price as 
+      (select product_id, sum(price) as sum_price from item
+group by product_id),
+     avg_price as 
+	   (select cast(avg(sm.sum_price) as int) as avg_price from sum_price as sm)
+
+SELECT sm.product_id
+FROM sum_price as sm
+JOIN avg_price AS ag ON sm.sum_price > ag.avg_price
+WHERE sm.sum_price > ag.avg_price;

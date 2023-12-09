@@ -1,0 +1,109 @@
+დავამატოთ ახალი ქოსთუმ ადმინ არეა:
+from django.contrib import admin
+from .models import CustomModel
+
+class CustomModelAdmin(admin.ModelAdmin):
+    list_display = ('field1', 'field2')  # Customize the fields displayed in the admin list view
+    site_header = 'Custom Admin Area'     
+ 
+თუ გავაკეთებთ ასე: list_display = [('field1', 'field2'), 'field3']
+field1 და field2 იქნებია ერთად დაჯგუფებულები
+
+# Register the model and the admin class
+custom_site = CustomModelAdmin(name='customAdmin')
+custom_site.register(CustomModel)
+
+
+უბრალოლდ ვაიმპორტებთ ამ custom_site ადმინ ფაილიდან
+path('customad/', custom_site.urls)
+
+
+fieldsets = (
+    ('section 1', {
+          'fields': (ფიელდის სახელები)    
+    }),
+        
+        ('section 2', {
+          'fields': (ფიელდის სახელები),
+                     'classes': ('collapse',),ამით შეგვიძლია ღილაკზე დაწოლით ეს სექშენი დავმალოთ   
+    }),
+)
+
+ასე შეგვიძლია შევამქნათ სხვადსხვა სექშენები და მათი ფიელდები
+
+
+
+
+
+UserAdmin ეს შეგვიძლია დავაიმპორტოთ from django.contrib.auth.admin import UserAdmin
+მოკლედ ეს არის ადმინ ფეიჯის ლუქი რა ასერომვთქვათ როგორც გამოიყურება იქაურობა ამის გამოყენებით შეგვიძლია შევცვალოთ მაგალითად დავამატოთ ფიელდები და ასშ  
+
+
+from django.contrib.auth.models import AbstractUser
+
+class NewUser(AbstractUser):
+    age = models.IntegerField()
+    name = models.CharField(max_length=50)   
+
+
+ამათ უკვე ვწერთ ადმინ ფაილში
+from .models import NewUser 
+django.contrib.auth.admin import UserAdmin
+
+class CustomUserAdmin(UserAdmin):
+    fieldsets = (
+        *UserAdmin.fieldsets,
+        (
+            'User info',
+             {'fields': ('age', 'name')}
+        ),
+    )
+
+admin.site.register(NewUser, CustomUserAdmin)
+
+როცა ამას ჩავწერთ უკვე ადმინ ფეიჯზე სადაც იუზერები ინახება დაემატება ცალკე გრაფა რომელსაც ერქმევა User info და ფიელდები იქნება ისინი
+
+შეგვიძლია ეს ფიელდები დავამატოთ რომელიმე გრაფაში ანუ ცალკე არ შევქმნათ
+
+fields = list(UserAdmin.fieldsets) შევაგროვეთ ყველა ფიელდი რომელიც იუზერს აქვს ადმინ ფეიჯზე
+
+fields[1] = ('Personal Info', {'fields': ('age', 'name')}) ანუ ეს არის მეორე ფიელდი სადაც წერია რაღაც სახელი გვარი და რაღაცეები და ჩვენც მაგ ფიელდში ჩავამატეთ ეს რაღაცეები ოღონც ფიელდები სუ უნდა დავწეროთ
+UserAdmin.fieldsets = tuple(fields)
+
+admin.site.register(NewUser, UserAdmin)
+
+
+მოკლედ ამით შეგვიძლია როცა ჩავწერ nameს ეგრევე ჩაიწეროს slug fieldში
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    prepopulated_fields = {
+        "slug": ("name",),
+    }
+
+
+
+
+
+
+თუ გვინდა რომ რაღაც ფიელდები ერთად იყოს შეგვიძლია გავაკეთოთ ასე
+
+class ProductImageInline(admin.TabularInline):
+    model = Image
+
+class AttributeValueInline(admin.TabularInline):
+    model = AttributeValue
+
+class StockControlInline(admin.TabularInline):
+    model = StockControl
+
+@admin.register(Inventory)
+class ProductInventoryAdmin(admin.ModelAdmin):
+    inlines = [ProductImageInline, StockControlInline]
+
+@admin.register(Attribute)
+class ProductAdmin(admin.ModelAdmin):
+    inlines = [
+        AttributeValueInline,
+    ]
+
+                                                                                                                                                                                                                               

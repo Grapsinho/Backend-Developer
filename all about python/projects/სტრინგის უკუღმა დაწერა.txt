@@ -1,0 +1,10 @@
+def reverse(n):
+    print(f"not reversed {n}")
+    st = ""
+    ll = n.split()
+    while ll:
+        st += ll.pop()[::-1]
+    print("reversed " + st)
+
+
+reverse("We will conquere COVID-19")

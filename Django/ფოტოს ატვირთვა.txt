@@ -1,0 +1,34 @@
+ესეიგი როდესაც შევქმნით იუზერ მოდელს თავიდან აქ შეგვიძლია მივუთითოთ ავატარიც ასე
+
+avatar = models.ImageField(null=True, default='avatar.svg')
+ესეიგი ამან რო იმუშავოს გვჭირდება ამ ფაქეიჯის დაინსტალირება
+python -m pip install Pillow
+
+ანუ დეფოულტად ავატარი იქნება ჩვენს სტატიკ ფაილში მყოფი ფოტო
+
+შემდეგ სეთინგებში ვამატაებთ
+
+ანუ სად წავა ატვირთული ფოტო
+MEDIA_ROOT = BASE_DIR / 'static/images'
+
+და შემდეგ უკვე გვინდა ურლ
+MEDIA_URL = 'images/'
+ვუთითებთ ასე
+
+ეს უკვე მთავარ ურლში ვუწერთ ამას
+
+ანუ ჩვენ იმ ორ რაღაცას ვაკავშირებთ რაც სეთინგებში გავწერეთ ფოტოსთვის
+ფაილ path იქნება ის პირველი ურლ ხოლო ფაილებს მივიღებთ მეორედან რუთიდან
+from django.conf.urls.static import static
+from django.conf import settings
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+<!--ანუ ვეუბნებით ფორმს რომ ამ ფორმით ვტვირთავთ სხვადასხვა სახის ფაილებსაც და არამახოლოდ ტექსტს-->
+          <form
+            action=""
+            method="POST"
+            class="room_create-form"
+            enctype="multipart/form-data"
+          >
+
+მოკლედ ეს არის თუ რამეა ამ პროექტში იქნება რა პასუხები

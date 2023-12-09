@@ -1,0 +1,69 @@
+ინფორმაციის წამოღება mySQL_იდან 
+
+შეგვიძლია ფიფქის ადგილას მივუთითოთ ქოლუმნი რომელიც გვინდა და წამოვიღბთ იმ ქოლუმნს
+myCursor.execute("SELECT * FROM students")
+
+ვიყენებთ ამ მეთოდს
+myresult = myCursor.fetchall()
+
+უბრალოდ ვატარებთ ლუპში
+for i in myresult:
+    print(i)
+
+
+ამით ჩვენ ვეუბნეით სქლ რომ გვინდა ყველა მოსწავლე რომელიც სწავლობს ბიოლოგიას და ასშ...
+myCursor.execute("SELECT * FROM students WHERE major = 'Biology'")
+
+SELECT * FROM students WHERE major = 'კომპიუტერული მეცნიერება' or major = 'ბიოლოგია'
+
+ასე ვამოწმებთ ორ შემთხვევას
+
+ანუ ყველაფერი რაც იწყება Sa_ზე ამოგვიგდებს თუ მარცხნივაც % დაუწერთ ესეიგი შუაშია ეს ასოები და ასშ
+
+myCursor.execute("SELECT * FROM students WHERE name LIKE 'Sa%'")
+
+///////////////////////////////////////////////
+
+
+SELECT DISTINCT column1, column2, ...
+FROM table_name;
+
+ამით მოგვაქ ინფო მაგრამ გამეორების გარეშე
+
+SELECT COUNT(DISTINCT Country) FROM Customers;
+
+გვითვლის განსხვავებულ რაღაცეებს
+
+
+WHERE employee.salary = (SELECT MAX(salary) FROM employee)  მაქსიმალური ანაზღაურება ანუ ვისაც ყველაზე მეტი აქ რა
+
+
+nested queries
+-- Find names of all employees who have sold over 50,000
+SELECT employee.first_name, employee.last_name
+FROM employee
+WHERE employee.emp_id IN (SELECT works_with.emp_id
+                          FROM works_with
+                          WHERE works_with.total_sales > 50000);
+
+-- Find all clients who are handles by the branch that Michael Scott manages
+-- Assume you know Michael's ID
+SELECT client.client_id, client.client_name
+FROM client
+WHERE client.branch_id = (SELECT branch.branch_id
+                          FROM branch
+                          WHERE branch.mgr_id = 102);
+
+ესეთუ რაღაცეებია რა
+
+
+
+select branch.branch_name, SUM(employee.salary) as jami
+FROM branch
+JOIN employee
+ON branch.branch_id = employee.branch_id
+GROUP BY branch.branch_name
+ORDER BY jami DESC
+LIMIT 1
+
+ანუ ვიპოვეთ ის დეპარტამენტი რომელიც ხარჯავს ყველზე მეტს ხელფასში

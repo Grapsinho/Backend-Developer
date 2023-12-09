@@ -1,0 +1,116 @@
+ეს არის ვირტუალური ცხრილი რომელიც იქმენბა ქუერისგან ის ინახავს ქუერის დატაბეიზში უნიკალური სახელით, ის არინახავს ინფორმაციას მხოლოდ ქუერის
+
+CREATE VIEW view_name AS
+SELECT column1, column2, ...
+FROM table_name
+WHERE condition;
+
+CREATE VIEW customer_info AS
+SELECT first_name, last_name, email
+FROM customer;
+
+
+CREATE OR REPLACE FUNCTION func_name(parameter par_type) RETURNS ret_type AS
+$body$
+BEGIN
+--statements
+END
+$body$
+LANGUAGE plpqsql
+
+
+ამით ვქმნით ჩვეულებრივ ფუნქციას რომელიც შემდგომ შგვიძლია გამოვიყენოთ ასევე
+CREATE OR REPLACE FUNCTION fn_item_price_sum()
+RETURNS numeric as
+$body$
+    SELECT SUM(price)
+	FROM item
+$body$
+LANGUAGE SQL
+
+ამით ვიგებთ ყველა კოსტუმერს რომელსაც არ აქვს ტელეფონი
+CREATE OR REPLACE FUNCTION fn_number_customers_no_phone()
+RETURNS numeric as
+$body$
+    SELECT COUNT(*)
+	FROM customer
+	WHERE phone IS NULL;
+$body$
+LANGUAGE SQL
+
+ვიყენებთ ასე: SELECT fn_number_customers_no_phone();
+
+
+ასე ვიგებთ რამდენი ამ შტატიდან:
+CREATE OR REPLACE FUNCTION fn_number_customers_from_state(state_name CHAR(2))
+RETURNS numeric as
+$body$
+    SELECT COUNT(*)
+	FROM customer
+	WHERE state_name = state;
+$body$
+LANGUAGE SQL
+
+SELECT fn_number_customers_from_state('GA');
+
+
+
+შეგვიძლია ასევე გამოვიყენოთ NATURAL JOIN რათა მარტივად დავაკავშიროთ ორი ცხრილი, ამდროს ორივე ცხრილს უნდა ქონდეს ერთი და იგივე ქოლუმნი
+
+SELECT COUNT(*)
+FROM sales_order
+NATURAL JOIN customer
+WHERE customer.first_name = 'Christopher' AND customer.last_name = 'Jones';
+ეს შეგვიძლია გამოვიყენოთ ამისთვის
+
+CREATE OR REPLACE FUNCTION fn_get_number_orders_from_customer(cus_fname varchar, cus_lname varchar) 
+RETURNS numeric as
+$body$
+	SELECT COUNT(*)
+	FROM sales_order
+	NATURAL JOIN customer
+	WHERE customer.first_name = cus_fname AND customer.last_name = cus_lname;	
+$body$
+LANGUAGE SQL
+
+SELECT fn_get_number_orders_from_customer('Christopher', 'Jones');
+
+
+ეს აბრუნებს ობიექტს და შემდეგ შეგვიძლია მაგ ობიექტიდან რაც გვინდა ის ავიღოთ
+CREATE OR REPLACE FUNCTION fn_get_last_order() 
+RETURNS sales_order as
+$body$
+	SELECT *
+	FROM sales_order
+	ORDER BY time_order_taken DESC
+	LIMIT 1;
+$body$
+LANGUAGE SQL
+
+SELECT fn_get_last_order();
+
+--Get in table format
+SELECT (fn_get_last_order()).*;
+
+///////////////////////////////////////
+
+CREATE OR REPLACE FUNCTION fn_get_employees_location(loc varchar) 
+RETURNS SETOF sales_person as
+$body$
+	SELECT *
+	FROM sales_person
+	WHERE state = loc;
+$body$
+LANGUAGE SQL
+
+SELECT (fn_get_employees_location('CA')).*;
+
+--Get names and phone number using function results
+SELECT first_name, last_name, phone
+FROM fn_get_employees_location('CA');
+
+
+
+
+
+

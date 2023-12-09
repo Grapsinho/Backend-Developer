@@ -1,0 +1,342 @@
+ესეიგი პირველი რაღაც რაც გაკვში იყო არის TemplateView ეს არის მარტივად რო ვთქვათ გმაოიყენება უფრო მარტივი ლოგიკებისთვის ის არის კარგი ფეიჯებისთვის რომლებიც არ შეიცავენ კომპლექსურ ლოგიკას
+
+# In your Django app's views.py
+from django.views.generic import TemplateView
+
+class AboutView(TemplateView):
+        ანუ თემფლეითი იქნება ეს
+    template_name = 'about.html'
+
+        ეს უკვე ინფორმაცია რაც ფეიჯზე უნდა იყოს
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['team_name'] = 'Our Awesome Team'
+        return context
+
+
+from django.urls import path
+from .views import AboutView
+
+urlpatterns = [
+    path('about/', AboutView.as_view(), name='about'),
+]
+
+
+
+
+შემდეგი არის RedirectView რომელიც გამოიყენება იუზერის ერთი ურლდან მეორეზე გადამისამართებისთვის
+
+ანუ მოკლედ როგორც გავიგე რა როცა მაგალითად გინდა რაღაც ლინკების შეცვლა შენს ვებსაიტზე ამისთვის ძაან კარგია რადგან შეგიძლია ისე გააკეთო რო როცა ჩაწერენ ძველ ლინკს გადავიდნენ ახალზე მაგალითად: old: product, new: products როცა ჩაწერენ ძველს გადამისამართდებიან ახალზე ამისათვისაა კარგი
+
+Status Code: 302
+Description: 302 სტატუსის კოდი მიუთითებს დროებით გადამისამართებაზე. ის ეუბნება ბრაუზერს, რომ მოთხოვნილი URL დროებით გადატანილია სხვა ადგილას. ბრაუზერმა უნდა გააგრძელოს ორიგინალური URL-ის გამოყენება მომავალი მოთხოვნებისთვის.
+
+
+Status Code: 301
+Description: 301 სტატუსის კოდი მიუთითებს მუდმივ გადამისამართებაზე. ის ეუბნება ბრაუზერს, რომ მოთხოვნილი URL სამუდამოდ გადატანილია სხვა ადგილას. შედეგად, ბრაუზერმა უნდა განაახლოს თავისი სანიშნეები, საძიებო სისტემის ინდექსები და ქეშები, რათა გამოიყენოს ახალი URL ყველა მომავალ მოთხოვნაში.
+
+ანუ მარტივად ვატყობინებთ ბრაუზერს რომ ძველი ლინკიდან ახალზე გადავიდეს
+
+
+views.py file:
+from django.views.generic.base import TemplateView, RedirectView
+from cbv.models import Post
+from django.shortcuts import get_object_or_404
+from django.db.models import F
+
+
+class Ex2View(TemplateView):
+
+    template_name = "ex2.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['posts'] = Post.objects.get(id=1)
+        context['data'] = "Context Data for Ex2"
+        return context
+
+
+class PostPreLoadTaskView(RedirectView):
+
+    # url = 'http://youtube.com/veryacademy'
+    pattern_name = 'cbv:singlepost'
+    # permanent = HTTP status code returned (True = 301, False = 302, Default = False)
+
+    def get_redirect_url(self, *args, **kwargs):
+        # post = get_object_or_404(Post, pk=kwargs['pk'])
+        # post.count = F('count') + 1
+        # post.save()
+
+        post = Post.objects.filter(pk=kwargs['pk'])
+        post.update(count=F('count') + 1)
+
+        return super().get_redirect_url(*args, **kwargs)
+
+
+class SinglePostView(TemplateView):
+
+    template_name = "ex4.html"  # single.html
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['posts'] = get_object_or_404(Post, pk=self.kwargs.get('pk'))
+        return context
+
+urls.py file: 
+from django.urls import path
+from django.views.generic import TemplateView, RedirectView
+from cbv.views import Ex2View, PostPreLoadTaskView, SinglePostView
+
+app_name = 'cbv'
+
+urlpatterns = [
+    # extra_context Attribute from ContentMixin - keyword argument for as_view()
+    path('ex1', TemplateView.as_view(template_name="ex1.html",
+                                     extra_context={'title': 'Custom Title'})),
+    path('ex2', Ex2View.as_view(), name='ex2'),
+    path('rdt', RedirectView.as_view(url='http://youtube.com/veryacademy'),
+         name='go-to-very'),
+    path('ex3/<int:pk>/', PostPreLoadTaskView.as_view(), name='redirect-task'),
+    path('ex4/<int:pk>/', SinglePostView.as_view(),
+         name='singlepost'),  # single post page
+]
+
+<a href="{% url 'cbv:redirect-task' pk=posts.id %}">{{posts.name}}</a>
+
+
+
+
+შემდეგი არის DetailView ეს არის იმისთვის რომ გამოვაჩინოთ რაიმე ერთი ობიექტის ინფორმაცია წამოღებული დათაბეიზიდან
+
+შეგვიძლია განვსაზღვროთ 3 რამ:
+
+1) MODEL ანუ რომელი მოდელშია ეს ჩვენი ობიექტი
+2) TEMPLATE რომელი ჰტმლ დოოკუმენტი გვინდა
+3)CONTEXT_OBJECT_NAME ანუ როდესაც ჰტმლ დოკუმენტში ჩავტვირთავთ ინფორმაციას დიფულტად არის OBIECT.NAME მაგალითად და ამით შეგვიძლია მივუთითოთ context_object_name = "book" და იქნება BOOK.NAME
+
+
+მაგალითად აქ გვაქ პროდუქტები და შეგვიძლია გადავიდეთ რომელიმე პროდუქტზე და ვნახოთ მისი ინფორმაცია
+
+class IndexView(TemplateView):
+
+    template_name = "home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['books'] = Books.objects.all()
+        return context
+
+
+class BookDetailView(DetailView):
+
+    model = Books
+    template_name = 'book-detail.html'
+    context_object_name = 'book'
+
+        ამით ვამატებთ დამატებით რაღაცეებს რა
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        post = Books.objects.filter(slug=self.kwargs.get('slug'))
+        post.update(count=F('count') + 1)
+
+        context['time'] = timezone.now()
+
+        return context
+
+
+
+
+
+შემდეგია ListView ეს გამოიყენება მაგალითად ყველა პროდუქტის ლისტის გამოსაჩენად ან ასშ...
+
+Model: რომელი მოდელიდან მოგვაქვს ინფორმაცია
+Template: რომელ ჰტმლ დოკუმენტს ვუგზავნით
+Context Data: სახელი ობიექტის მაგალითად book: book.name
+Pagination: ანუ რამდენი აითემი იყოს ერთ ფეიჯზე
+
+
+from django.views.generic import ListView
+from .models import BlogPost
+
+class BlogPostListView(ListView):
+    model = BlogPost
+    template_name = "blogpost_list.html"
+    context_object_name = "blogposts"
+    paginate_by = 10
+
+
+
+ აქ შეგვიძლია ჩავამატოთ რაღაცეები ან შევცვალოთ ქუერისეთი
+  def get_queryset(self, *args, **kwargs):
+            მაგალითად ეხლა მხოლოდ გვაქ ის წიგნები რომლებიც ემთხვევა ამ რაღაცას
+      return Books.objects.filter(genre__icontains=self.kwargs.get('genre'))
+
+
+
+
+შემდეგია FormView ეს გამოიყენება ფორმის გამოსაჩენად, ვალიდურობის შესამოწმებლას ასევე თუ სადმე ერორი იქნება ეგეც გამოჩნდება და კიდე სხვადასხვა რაღაცეები
+
+გამოიყენება ძირითადად კონტაქტ ფორმებისთვის ფიდბექებისთვის და ასშ...
+
+Form Class: ანუ forms.py ფაილს რო ვაკეთებთ ეგ უნდა აქ რათა ჩვენი ფორმა წარმოვადგინოთ
+Template: იცი რაც არის
+success_url: უბრალოდ ურლ თუ ფორმა სწორეა ანუ სად წავა იუზერი როცა ფორმას დააწვება
+
+from django.views.generic.edit import FormView
+from .forms import ContactForm
+
+class ContactFormView(FormView):
+    form_class = ContactForm
+    template_name = "contact_form.html"
+    success_url = "/contact/success/"
+
+    def form_valid(self, form):
+        # Process the form data when it's valid
+        form.send_email()
+        return super().form_valid(form)
+
+
+
+ემაილის გაგზავნაც შეგვიძლია
+ეს ფორმის ფაილში უნდა დავწეროთ
+from django import forms
+from django.core.mail import send_mail
+
+class ContactForm(forms.Form):
+    name = forms.CharField(max_length=100)
+    email = forms.EmailField()
+    message = forms.CharField(widget=forms.Textarea)
+
+    def send_email(self):
+        # Custom logic to send an email based on the form data
+        subject = 'Contact Form Submission'
+        message = f'Name: {self.cleaned_data["name"]}\nEmail: {self.cleaned_data["email"]}\nMessage: {self.cleaned_data["message"]}'
+        sender_email = 'your@example.com'
+        recipient_email = 'admin@example.com'
+        send_mail(subject, message, sender_email, [recipient_email])
+
+
+
+არის ასევე CreateView ეს უკვე გამოიყენება დატაბეიზში ინფორმაციის შესატანად
+
+მსგავსი რაღაცეები აქვს რაც ფორმვიუს ქონდა მაგრამ არ ჭირდება form_valid() ეს ფუნქცია რათა ჩაამახსოვროს ინფორმაცია
+
+ესენი ჭირდება ძირითადად
+model = Product
+form_class = ProductForm  # Optional, if using a custom form
+template_name = "product_form.html"
+success_url = "/products/"
+
+აქ უბრალოდ შეგვიძლია დავამატოთ რამე
+def form_valid(self, form):
+        # Customize form processing logic here, e.g., setting additional fields
+        form.instance.seller = self.request.user  # Assuming you associate the seller with the product
+        return super().form_valid(form)
+
+
+ჩვეულებრივი ჰტმლ
+<form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="submit">
+                </form>
+
+
+ესეიგი არის UpdateView ანუ ააბდეითებს ჩვენს დეითაბეის იგივეა რაც ქრეათე ვიუ ვაფშე არაფერით განსხვავდება
+
+
+
+
+
+ანუ რახდება ეხლა აქ როდესაც იუზერი შექმნის ახალ ავტორს ჩვენ გვჭირდება რაღაც ფეიჯი რო მაგაზე გადავიდეთ ანუ redirect მოხდეს ჩვენ არ გვაქ მითითებული მაგრამ გვაქ get_absolute_url მოდელებში ანუ როდესაც იუზერი შექმნის ახალ რამეს ეგრევე გადაგვიყვანს დითეილ ვიუზე სადაც იქნება ამ ავტორის აიდი და მასზე ინფორმაცია
+
+
+
+class AuthorDetailView(DetailView):
+    model = Author
+    template_name = 'author_detail.html'
+
+
+class AuthorCreateView(CreateView):
+    model = Author
+    template_name = 'author_create.html'
+    fields = ['name',]
+
+    def form_valid(self, form):
+
+        messages.add_message(
+            self.request, 
+            messages.SUCCESS,
+            'The author has been added'
+        )
+
+        return super().form_valid(form)
+
+
+class Author(models.Model):
+
+    name = models.CharField(null=False, blank=False, max_length=255)
+
+    def get_absolute_url(self):
+        return reverse('books:author_detail', kwargs={'pk': self.pk})
+
+    def __str__(self):
+        return self.name
+
+ path('authors/<int:pk>/', views.AuthorDetailView.as_view(), name='author_detail'),
+
+<button type="submit" class="btn btn-primary w-100 mb-2">Add Author</button>
+
+
+
+
+
+მოკლედ AuthorBooksFormset = inlineformset_factory(Author, Book, fields=('title',)) როდესაც ამას დავწერთ ჩვენს ფორმს ფაილში ამდროს ჩვენ ვქმნით ასეთ რამეს შეგვიძლია ვმართოთ ასერომვთქვათ ჩვენი ფორმა რომელიც დაკავშირებული არის ამშემთხვევაში ავტორთან
+
+შეგვიძლია extra ატრიბუტით დავამატოთ რამდენი ინფუთიც გვინდა
+
+ანუ ეს ძირითადად გამოიყენება cbvში რათა იუზერმა დაარედაქტიროს მრავალი ფორმა რომელიც არის დაკავშირებული ამა თუ იმ მოდელთან ამ შემთხვევაში ავტორთან
+
+class AuthorBooksEditView(SingleObjectMixin, FormView):
+
+    model = Author
+    template_name = 'author_books_edit.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object(queryset=Author.objects.all())
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object(queryset=Author.objects.all())
+        return super().post(request, *args, **kwargs)
+
+    def get_form(self, form_class=None):
+        return AuthorBooksFormset(**self.get_form_kwargs(), instance=self.object)
+
+    def form_valid(self, form):
+        form.save()
+
+        messages.add_message(
+            self.request,
+            messages.SUCCESS,
+            'Changes were saved.'
+        )
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('books:author_detail', kwargs={'pk': self.object.pk})
+
+ 
+
+
+
+
+
+
+
+
+
+
+

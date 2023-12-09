@@ -1,0 +1,40 @@
+ესეიგი რათა დავიწყოთ დასერჩვა რაღაცეების შეგვიძლია გამოვიყენოთ ეს
+
+<a href="{% url 'home' %}?q={{topic.name}}">{{topic.name}}</a>
+
+ესეიგი აქ q იქნება იმის ტოლი რასაც დავაწვებით მაგალითად თუ დავაწვებით Python ასეთი რაღაც დაიწერე ლინკში http://127.0.0.1:8000/?q=Javascript და ეს შგვიძლია გამოვიყენოთ სერჩვაში და ჰოუმ ლინკი იმიტომ რომ დაგვაბრუნოს ჰოუმ გვერძე და ამოგვიყაროს ყველა ის რუმი რასაც დავსერჩავთ
+
+
+ესეთი გახდება ჩვენი ჰოუმ ფუნქცია
+def home(request):
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+
+    # ეს იქნებოდა მაღლითას მსგავსი
+    # გვჭირდება იმისთვის რომ მაინც ჩანდეს ყველაფერი იმის მიუხედავად q ცარიელია თუ არა
+    #if q != None:
+        #q = request.GET.get('q')
+    #else:
+       # q = ''
+
+    rooms = Room.objects.filter(
+        
+                ესეიგი ჩვენ რუმები შეგვიძლია რამოდენიმე რამით მოვძებნოთ და ეს რომ გავაკეთოთ გვჭირდება from django.db.models import Q ეს იმპორტი
+        Q(topic__name__icontains=q) |
+        Q(name__icontains=q) | 
+        Q(description__icontains=q)
+    
+    ) # აქ კი ვაგზავნით მოთხოვნას იმ მონაცემებზე რომლების ასოებიც ემთხვევა ამათუ იმ ტოპიკს მაგალითად თუ ჩავწერეთ py ეს დაემთხვევა python და ასშ...
+    
+    topic = Topic.objects.all()
+    room_count = rooms.count()
+
+    context = {"rooms": rooms, "topics": topic, "room_count": room_count}
+    return render(request, 'playground/home.html', context)
+
+
+შემდეგ ნავბარში ვამატებთ ფორმს
+
+<!--მინდა რომ იუზერი გაგზავნოს ჰოუმ ფეიჯზე როცა რამეს ჩაწერს-->
+<form action="{% url 'home' %}" method="get">
+  <input type="text" name="q" /> ანუ q გახდება ის რასაც ჩავწერთ
+</form>

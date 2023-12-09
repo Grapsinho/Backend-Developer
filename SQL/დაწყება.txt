@@ -1,0 +1,17 @@
+მოკლედ ვიწყებთ ამით ვაკავშირებთ ჩვენს პითონს mySQL_თან
+import mysql.connector
+
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="chemirutpaswordi",
+     
+    ამას ვამატებთ მაშინ როცა ვქმნით database_ს
+    database="student"
+)
+
+//////////////////////////////////////////////////////
+შემდეგ გვჭირდება ეს
+
+ეს ახდენს კომუნიკიაციას შენს მთლიან mySQL სერვერთან და ამის დახმარებით შევქმნით database_ს და ამით შევქმნით კიდე ბევრ რამეს
+myCursor = mydb.cursor()

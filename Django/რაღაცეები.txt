@@ -1,0 +1,34 @@
+manage.py dumpdata აპის სახელი.მოდელის სახელი > ჯსონ ფაილის სახელი.json
+ასე შეგვიძლია ჩვენი დატა გადავიტანოთ ჯსონ ფაილში
+
+
+
+
+
+ესეიგი თუ გვინდა რომ ჰექს ქოლორი შევინახოთ ჩვენს დატაბეისში ამისათვის გვჭირდება შევქმნათ ქოსთუმ ფიელდი
+
+ესეიგი ამ კოდს ვწერთ რომელიმე სხვა ფაილში მაგალითად fields.py  შემდეგ ვაიმპორტებთ მოდელში და ვწერთ ფიელდის სახით
+
+color = HexColorField() და ეგაა გვაქ ჰექს ქოლორი
+
+class HexColorField(models.CharField):
+    def __init__(self,*args,**kwargs):
+        kwargs['max_length'] = 6
+        super().__init__(*args, **kwargs) ეს მოუწოდებს მშობელი კლასის კონსტრუქტორს რომ მოახდინოს ველის ინიციალიზაცია მოწოდებული არგუმენტებით
+
+    ამით ვეუბნებით დატაბეის რომ ამის ტაიპი იქნება ინტეჯერი
+    def db_type(self, connection):
+        return 'INTEGER(3)'
+        
+        ამას ჩვენი ჰექს კოდი გადაყავს რიცხვებში თექვსმეტობითში
+    def get_prep_value(self, value):
+        if value is None:
+            return None
+        return int(value, 16)
+    
+        ამას ისევ უკან გადმოყავს
+    def from_db_values(self, value, expression, connection):
+        if value is None:
+            return None
+        hex_value = format(value, 'X')
+        return hex_value

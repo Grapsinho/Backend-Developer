@@ -1,0 +1,36 @@
+Numeric Types:
+
+serial: ესენი გამოიყენება აიდებისთვის, ეს ამ ტიპებს აქვთ აუტო ინკრემენტი
+
+smallserial: 1 to 32000
+serial: 1 to 2000000
+bigserial: 1 to 9000000000000000
+
+Integer: მთელი ციფრები მხოლოდ, გამოიყენება მაშინ როდესაც არ გჭირდება 1.23 ასეთი ციფრი
+
+Smallint: -32000 to 32000
+Integer: -2000000 to 2000000000
+bigint: -9000000000000000 to 9000000000000000
+
+Floats: decimal ციფრები
+
+
+Boolean Type:
+
+Boolean Type: BOOLEAN
+Stores true/false values.
+
+
+Date/Time Types:
+
+Date Types: DATE
+
+Stores dates without any time information.
+Time Types: TIME, TIMESTAMP, TIMESTAMPTZ
+
+TIME stores time of day. TIMESTAMP stores date and time, and TIMESTAMPTZ stores date, time, and timezone information.
+
+Interval Types: INTERVAL
+Represents a period of time, like days, hours, minutes, etc.
+
+

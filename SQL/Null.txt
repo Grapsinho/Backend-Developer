@@ -1,0 +1,11 @@
+როგორ შევამოწმოთ Null
+მოკლედ როდესაც ცხრილის რომელიმე უჯრას აქვს NULL მნიშვნელობა ესეიგი ეს ნიშნავს რომ ამ უჯრას არ აქვს მნიშვნელობა 
+
+SELECT column_names
+FROM table_name
+WHERE column_name IS NOT NULL;
+
+
+SELECT column_names
+FROM table_name
+WHERE column_name IS NULL;

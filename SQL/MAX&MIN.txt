@@ -1,0 +1,11 @@
+SELECT MAX&MIN(column_name)
+FROM table_name
+WHERE condition;
+
+SELECT MIN(Price) AS SmallestPrice
+FROM Products;
+
+SELECT MAX(Price) AS LargestPrice
+FROM Products;
+
+მოკლედ ეს ორი ფუნქცია აბრუნებს ან ყველაზე მაღალს ან ყველაზე დაბალს შეგვიძლია რაიმე WHERE მივუთითოთ 

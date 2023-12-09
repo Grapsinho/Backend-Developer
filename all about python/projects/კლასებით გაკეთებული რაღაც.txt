@@ -1,0 +1,90 @@
+კაი პროგრამაა რა იყოს პროსტა
+
+x = input("შეიტანეთ კლიენტის სახელი და გვარი: ")
+y = int(input("რა თანხა გაქვთ ამჟამად ანგარიშზე? "))
+u = input("შეიტანეთ შესაბამისი კოდი რომელი ოპერაციის შესრულება გსურთ: "
+          "თანხის შეტანა: 1, თანხის გამოტანა: 2 ")
+
+if u == "1":
+    t = int(input("რა თანხის შეტანა გსურთ: "))
+elif u == "2":
+    c = int(input("რა თანხის გამოტანა გსურთ: "))
+
+class bank_Accaunt:
+
+    def __init__(self, account_name, balance=0):
+        self.account_name = account_name
+        self.balance = balance
+
+    def rename(self, name):
+        self.account_name = name
+
+    def get_name(self,):
+        print(self.account_name)
+
+    def deposite(self):
+        return y + t
+
+    def withdraw(self):
+        return y - c
+
+
+
+user_01 = bank_Accaunt(x, y)
+
+
+if u == "1":
+    print(f"თანხის შეტანა დასრულებულია ამჟამად ანგარიშზე გაქვთ {user_01.deposite()} ლარი")
+elif u == "2":
+    print(f"თანხის გამოტანა დასრულებულია ამჟამად ანგარიშზე გაქვთ {user_01.withdraw()} ლარი")
+
+
+
+///////////////////////////////////////////////////
+
+class Person:
+    def __init__(self, name, deposit=1000, loan=0):
+        self.name = name
+        self.deposit = deposit
+        self.loan = loan
+
+    def __str__(self):
+        return f"{self.name}_ის ამჟამინდელი თანხა შეადგენს {self.deposit} ლარს, ხოლო სესხი {self.loan} ლარს"
+
+    def changeDeposit(self, price):
+        return self.deposit + price
+
+class House:
+    def __init__(self, ID, price, owner, status):
+        self.ID = ID
+        self.price = price
+        self.owner = owner
+        self.status = status
+
+    def sellHouse(self, buyer, loan=0):
+        if self.status == "გასაყიდი":
+            if loan == 0:
+                print(f"{self.owner.name} თქვენი დეპოზიტი გახდა {self.owner.changeDeposit(self.price)} ლარი")
+                print(f"ასევე სახლის მეპატრონე გახდა {buyer.name}")
+                self.status = "გაყიდულია"
+                print(f"სახლის სტატუსი გახდა {self.status}!")
+            else:
+                print(f"{self.owner.name} თქვენი დეპოზიტი გახდა {self.owner.changeDeposit(self.price)} ლარი")
+                print(f"ასევე სახლის მეპატრონე გახდა {buyer.name}")
+                self.status = "გაყიდულია სესხით"
+                print(f"სახლის სტატუსი გახდა {self.status}!")
+                buyer.loan += loan
+                print(f"{buyer.name}_იმ(ამ) აიღო სესხი {buyer.loan} ლარის ოდენობით")
+        else:
+            print("სახლი გაყიდულია")
+
+
+obj1 = Person("გიორგი", 2500, 300)
+obj2 = Person("რატი", 2300, 200)
+obj3 = Person("საბა", 2700, 500)
+
+houseObj1 = House(2453, 25000, obj1, "გასაყიდი")
+houseObj2 = House(2453, 25000, obj1, "გაყიდული")
+
+houseObj1.sellHouse(obj2, 25000)
+houseObj1.sellHouse(obj3, 25000)

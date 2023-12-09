@@ -1,0 +1,18 @@
+ეს ითვლის როუების რიცხვს რომლებიც შეესაბამება მითითებულ კრიტერიუმებს
+SELECT COUNT(column_name), აქ შეგვიძლია დავწეროთ იმ ქოლუმნის სახელი და მაგალითად დაგვიბეჭდავს რამდენია კაცი და რამდენი ქალი გვერდი-გვერდ და ასშ...
+
+ოღონც სუ ბოლოში უნდა მივუწეროთ GROUP BY და იმ ქოლუმნის სახელი
+FROM table_name
+WHERE condition;
+
+
+
+ეს ითვლის საშუალოს იმ ქოლუმნისა რომელიც არის ციფრი
+SELECT AVG(column_name)
+FROM table_name
+WHERE condition;
+
+ეს კი ჯამს
+SELECT SUM(column_name)
+FROM table_name
+WHERE condition;

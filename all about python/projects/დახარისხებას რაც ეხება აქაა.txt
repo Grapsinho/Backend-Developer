@@ -1,0 +1,33 @@
+def find_min(data):
+    global min_value
+    for i in range(len(data)):
+        min_value = min(data[i:])
+        min_index = data.index(min_value, i) # ანუ ამდროს ვეუბნები რომ მოიაროს მთლიანი ლისტი რათა მოძებნოს ასევე არის თუ არა ორი ერთნაირი
+        if data[i] != data[min_index]: # თუ ორი ერთნაირია აღარ გაცვალო ადგილები თქო
+            data[i], data[min_index] = data[min_index], data[i] 
+    return data
+
+print(find_min([1,65,7, 7,2,4,6])) #outbput [1, 2, 4, 6, 7, 65]
+
+
+
+def find_min(data):
+    global min_value
+    for i in range(len(data)):
+        min_value = data[i]
+        for j in range(i + 1, len(data)):
+            if data[j] < min_value:  თუ აქ დავწერთ > მაშინ დავალაგებთ პირიქით
+                min_value = data[j]
+        min_index = data.index(min_value, i) # ანუ ამდროს ვეუბნები რომ მოიაროს მთლიანი ლისტი რათა მოძებნოს ასევე არის თუ არა ორი ერთნაირი
+        if data[i] != data[min_index]: # თუ ორი ერთნაირია აღარ გაცვალო ადგილები თქო
+            data[i], data[min_index] = data[min_index], data[i]
+    return data
+
+print(find_min([5,65,7, 7,2,4,6])) #outbput [2, 4, 5, 6, 7, 7, 65]
+
+ეს min() ფუნქციის გარეშე
+
+
+num = int(input("How many: "))
+list1 = [int(input("enter number: ")) for x in range(num)]
+ესეიგი რამდენსაც ჩავწერთ num ში იმდენი რიცხვის შეტანა შეგვეძლება ლისტში

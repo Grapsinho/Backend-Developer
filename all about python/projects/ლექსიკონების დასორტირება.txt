@@ -1,0 +1,26 @@
+data = [
+    {"name":"Robe","age": 25, "salary": 5000},
+    {"name":"Ani","age": 21, "salary": 2000},
+    {"name":"Giorgi","age": 25, "salary": 4000},
+]
+
+def getKeys(x):
+    return x["age"], x["salary"]
+
+sorted(data, key = getKeys)
+
+ამით ვასორტირებთ ლექსიკონებს
+
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+
+import operator
+data = [
+    {"name":"Robe","age": 25, "salary": 5000},
+    {"name":"Ani","age": 21, "salary": 2000},
+    {"name":"Giorgi","age": 25, "salary": 4000},
+]
+
+x = sorted(data, key = operator.itemgetter("age", "salary"))
+
+ამითიც ოღონც ეს უფრო კაია

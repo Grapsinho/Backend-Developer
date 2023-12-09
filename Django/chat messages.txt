@@ -1,0 +1,51 @@
+room_massages = room.messages_set.all() # ეს გვაძლევს ყველა ამ რუმთან დაკავშირებულ მესიჯებს
+
+    # ამ ყველაფრით ჩვენს მესიჯის მოდელში ვაწვდით მონაცემებს რომლებსაც შემდგომ ვიყენებთ
+    if request.method == 'POST':
+        message = Messages.objects.create(
+            user=request.user,
+            room=room,
+            body=request.POST.get('body')
+        )
+        return redirect('room', pk=room.id)
+
+    context = {"room": room, 'room_massages': room_massages}
+
+მოკლედ პირველ რიგში გვჭირდება ესენი ჩვენს რუმ ფეიჯზე
+
+<div>
+        <div>
+          <h3>You created {{room.name}} room</h3>
+
+          <p>{{room.description}}</p>
+        </div>
+
+        <div class="comment_wrapper">
+          <div>
+            <h4>Conversation</h4>
+            <hr />
+
+            {% for message in room_massages %}
+            <small>                                         შექმნის დროიდან ითვლის დროს
+              <p>@{{message.user}}, {{message.created|timesince}} ago</p>
+              <hr />
+                                მესიჯები
+              <p>{{message.body}}</p>
+            </small>
+            {% endfor %}
+          </div>
+
+          {% if request.user.is_authenticated %}
+          <div class="comment_form">
+            <form action="" method="POST">
+              {% csrf_token %}
+              <input
+                type="text"
+                name="body"
+                placeholder="Type your comment here..."
+              />
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      </div>

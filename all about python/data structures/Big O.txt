@@ -1,0 +1,90 @@
+ანუ ეს არის რაღაც გზა იმის გამოსახატავად თუ რამდენ დროს მოითხოვს ალგორითმი input ის ზრდასთან ერთად
+
+მაგალითად, თუ ალგორითმს აქვს O(n^2) დროის სირთულე, ეს ნიშნავს, რომ ალგორითმის უარეს შემთხვევაში გაშვების დრო კვადრატულად იზრდება შეყვანის ზომასთან ერთად. თუ შეყვანის ზომა გაორმაგდება, მუშაობის დრო გაიზრდება ოთხჯერ.
+
+Big O ნოტაცია ჩვეულებრივ გამოიყენება კომპიუტერულ მეცნიერებაში ალგორითმების ეფექტურობის გასაანალიზებლად და სხვადასხვა ალგორითმების შესადარებლად, რომელია უფრო სწრაფი ან ეფექტური. ის საშუალებას აძლევს დეველოპერებს და ინჟინრებს გაიგონ, თუ როგორ გაიზრდება ალგორითმი შეყვანის ზომის გაზრდით და აირჩიონ საუკეთესო ალგორითმი მოცემული პრობლემისთვის.
+
+O(1) Constant : გაშვების დრო მუდმივია, მიუხედავად შეყვანის ზომისა. hash tables ელემენტის პოვნა არის ოპერაციის მაგალითი, რომელიც შეიძლება შესრულდეს მუდმივ დროში.
+
+O(n) linear : გაშვების დრო წრფივად იზრდება შეყვანის ზომასთან ერთად. ფუნქცია, რომელიც ამოწმებს მდგომარეობას სიის ყველა ელემენტზე, არის O(n) ალგორითმის მაგალითი.
+
+O(n2)	quadratic : ანუ გაშვების დრო არის შეყვანის ზომის კვადრატული ფუნქცია, ანუ ეს არის მაგალითად როდესაც ვეძებეთ დუბლიკატებს ლისტში ანუ ამდროს თითოეული აითემი ორჯერ უნდა შემოწმდეს ეს არის მაგალითი ამის
+
+O(2n)	exponential : მოკლედ ეს ალგორითმები უკიდურესად არაეფექტურია ასერომ დავიკიდოთ, მაგრამ ეს გამოიყენება მაგალითად როგორიცაა სამი ფერის პრობლემა როდესაც მთავარი პრობლემაა ის რომ იპოვოთ გზა გრაფიკის წვეროების გასაფერადებლად სამი ფერის გამოყენებით (მაგალითად, წითელი, ლურჯი და მწვანე), ისე, რომ არცერთ მიმდებარე წვეროს არ ჰქონდეს იგივე ფერი.
+
+O(log n) logarithmic : გაშვების დრო იზრდება წრფივად, ხოლო შეყვანის ზომა ექსპონენტურად იზრდება. მაგალითად, თუ ათასი ელემენტის დამუშავებას ერთი წამი სჭირდება, მაშინ ათი ათასის დამუშავებას ორი წამი დასჭირდება, ასი ათასის დამუშავებას სამი წამი და ა.შ. ორობითი ძებნა არის ლოგარითმული გაშვების ალგორითმის მაგალითი.
+
+
+ასე შეგვიძლია შევამოწმოთ ალგორითმის დრო
+
+from random import randint
+from timeit import repeat
+
+l1 = [1,5,7,4,22,4,23,333,1,21]
+
+def run_sorting_algorithm(algorithm, array):
+    # Set up the context and prepare the call to the specified
+    # algorithm using the supplied array. Only import the
+    # algorithm function if it's not the built-in `sorted()`.
+    setup_code = f"from __main__ import {algorithm}" \
+        if algorithm != "sorted" else ""
+
+    stmt = f"{algorithm}({array})"
+
+    # Execute the code ten different times and return the time
+    # in seconds that each execution took
+    times = repeat(setup=setup_code, stmt=stmt, repeat=3, number=10)
+
+    # Finally, display the name of the algorithm and the
+    # minimum time it took to run
+    print(f"Algorithm: {algorithm}. Minimum execution time: {min(times)}")
+
+
+def bubble_sort(array):
+    n = len(array)
+
+    for i in range(n):
+        # Create a flag that will allow the function to
+        # terminate early if there's nothing left to sort
+        already_sorted = True
+
+        # Start looking at each item of the list one by one,
+        # comparing it with its adjacent value. With each
+        # iteration, the portion of the array that you look at
+        # shrinks because the remaining items have already been
+        # sorted.
+        for j in range(n - i - 1):  ანუ აქ ჩვენ ვიმეორებთ პირველად მთლიან ლისტს შემდეგ უკვე როდესაც i გახდება ერთი მაშინ უკვე ყველაზე დიდი ელემენტი უკვე სიის ბოლოშია ასერომ ჩვენ მთლიანი ლისტის რამოდენიმეჯერ გამეორება აღარ გვჭირდება შემდეგ გამოაკლდება ორი და ასშ... ანუ თავიდან მაგალითად თუ ლისტის ელემენტები უდრის 10 მაშინ პირველად გამოაკლდება 10 - 0 - 1 ანუ 9
+            if array[j] > array[j + 1]: 
+                # If the item you're looking at is greater than its
+                # adjacent value, then swap them
+                array[j], array[j + 1] = array[j + 1], array[j]
+
+                # Since you had to swap two elements,
+                # set the `already_sorted` flag to `False` so the
+                # algorithm doesn't finish prematurely
+                already_sorted = False
+
+        # If there were no swaps during the last iteration,
+        # the array is already sorted, and you can terminate
+        if already_sorted:
+            break
+
+    return array
+
+if __name__ == "__main__":
+    # Generate an array of `ARRAY_LENGTH` items consisting
+    # of random integer values between 0 and 999
+    array = [randint(0, 1000) for i in range(len(l1))]
+
+    # Call the function using the name of the sorting algorithm
+    # and the array you just created
+    run_sorting_algorithm(algorithm="bubble_sort", array=array)
+    print(bubble_sort(l1))
+
+
+
+
+
+
+
+

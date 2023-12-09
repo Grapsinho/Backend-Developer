@@ -1,0 +1,7 @@
+აქ შევქმენი ფრაიმარი ქი და ასევე ვზრდი მას ერთით ყოველ ახალ იუზერზე
+
+myCursor.execute("CREATE TABLE students (student_id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(20), major VARCHAR(20))")
+
+
+
+

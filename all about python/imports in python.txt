@@ -1,0 +1,119 @@
+import time
+epoch = when your computer thinks time began
+მოკლედ გამოიყენება რაღაც დროის საკითხებში თუ რამე დამავიწყდება bro code უდევს ვიდეო და მარტივად გავიგებ
+
+import math
+ნუ მათემატიკის ფუნქციებს ამატებს
+
+import random
+rand_number = random.randint(1,50) რენდომ ციფრს გვიბრუნებს
+
+import re
+მოკლედ ეს გამოვიყენე სიტყვაში მძიმეების მოსაშორებლად
+re.sub('{აქ ვწერთ ყველა იმ ნიშანს რისი მოშორებაც გვინდა}', 'აქეთ უკვე რითი გვინდა ჩანაცვლება', და ბოლოს რომელი ცვლადისთვის მუშაობს)
+
+
+
+
+
+
+import schedule
+
+def main():
+    print("giorgi")
+
+def func():
+    schedule.every(6).seconds.do(main) #ყოველ 6წამში
+    schedule.every(5).minutes.do(main) #ყოველ 5წუთში
+    schedule.every().hour.do(main) #ყოველ საათში
+    schedule.every().day.at("21:00").do(main) #ყოველ დღე 9საათზე ღამის
+    schedule.every().monday.do(main) #ყოველ ორშაბათს
+    schedule.every(6).friday.at("23:00").do(main) #ყოველ პარასკევს 23 საათზე
+
+    #მგონი ჩაციკვლა საჭიროა თუ არადა ვნახავ რორამე
+    while True:
+        schedule.run_pending()
+
+#ამით იმიტო ვუშვებ რომ თუ სხვაგან დავაიმპორტე ეს ფაილი რამე პრობლემა რომ არ იყოს
+if __name__ == '__main__':
+    func()
+
+//////////////////////////////////////////////////////////////////////////////
+
+import schedule
+import win10toast #ამით
+
+def main():
+    print("giorgi")
+
+    #მოკლედ ამით ჩვენ ვაგზვანით მესიჯს პირდაპირ ეკრანზე
+    toast = win10toast.ToastNotifier()
+    toast.show_toast(title="Greeting", msg="Hello how are you", duration=10)
+
+
+def func():
+    schedule.every(6).seconds.do(main) #ყოველ 6წამში
+
+    #მგონი ჩაციკვლა საჭიროა თუ არადა ვნახავ რორამე
+    while True:
+        schedule.run_pending()
+
+#ამით იმიტო ვუშვებ რომ თუ სხვაგან დავაიმპორტე ეს ფაილი რამე პრობლემა რომ არ იყოს
+if __name__ == '__main__':
+    func()
+
+
+greetings = {
+        "09:00": "Good Morning",
+        "13:00": "Hello",
+    }
+
+    #მოკლედ ამით ჩვენ ვაგზვანით მესიჯს პირდაპირ ეკრანზე
+    toast = win10toast.ToastNotifier()
+
+    for i,j in greetings.items():
+        toast.show_toast(title="Greeting", msg=f"{i} --> {j}", duration=10)
+
+ასე უკვე ლექსიკონიდან ვაგზავნით მესიჯებს
+
+
+
+///////////////////////////////////////////////////////////
+import schedule
+import win10toast
+
+#ამ იმპორტით
+import requests
+
+def main():
+    #მოკლედ ამით ჩვენ ვაგზვანით მესიჯს პირდაპირ ეკრანზე
+    toast = win10toast.ToastNotifier()
+
+    #წამოვიღეთ მონაცემები ამ საიტიდან
+    resp = requests.get("https://yobit.net/api/3/ticker/btc_usd")
+
+    #წამოვიღეთ json ფორმატით
+    data = resp.json()
+
+    #შემდეგ დავამუშავე ლექსიკონი იყო
+    last_price = round(data["btc_usd"]["last"])
+
+    #და გავუშვით აქ
+    toast.show_toast(title="Greeting", msg=str(last_price), duration=10)
+
+def func():
+    schedule.every(2).seconds.do(main) #ყოველ 2წამში
+
+    #მგონი ჩაციკვლა საჭიროა თუ არადა ვნახავ რორამე
+    while True:
+        schedule.run_pending()
+
+#ამით იმიტო ვუშვებ რომ თუ სხვაგან დავაიმპორტე ეს ფაილი რამე პრობლემა რომ არ იყოს
+if __name__ == '__main__':
+    func()
+
+
+
+from fractions import Fraction
+
+Fraction(0.6).limit_denominator() ათწილადი გადაგვყავს წილადში

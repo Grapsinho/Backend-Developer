@@ -1,0 +1,117 @@
+მოკლედ პირველ რიგში რეგსიტრაციისთვის და სხვა რაღაცეებისთვის შევქმენი ახალი აპპ users
+
+და ინსტალედ აპპებში შევიტანე
+
+შემდეგ შევქმენი forms.py ფაილი სადაც დავაიმპორტე იუზერი და usercreationform შემდეგ შევქმენი კლასი usersform და ვუთხარი კლასს რომ მოედლი იქნებოდა User ხოლო fields გადმოვიტანე მხოლოდ სახელი პაროლი და ემაილი ლისტის სახით
+
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+
+შემდეგ გადავედი viewsში რათქმაუნდა ჩვენი შექმნილი კლასი გამოვიტანე ფორმიდან from .forms import UsersForm და დავიწყე რეგისტრაციის ფორმის შექმნა
+
+def register(request):
+    form = UsersForm() ეს არის ის კლასი ფორმადან
+
+    if request.method == 'POST':
+        form = UsersForm(request.POST)
+        if form.is_valid():
+            form.save() ანუ მონაცემებს ვასეივებთ User მოდელში
+            messages.success(request, 'New account was created!') ეს არის ფლაშ მესიჯი რომელიც აქაუნთის შექმნისას გამოვა ეკრანზე from django.contrib import messages
+
+            return redirect('login') და ეგრე გადავდივართ ლოგინ ფეიჯზე რათა იუზერმა შეიყვანოს თავისი მისამართი
+
+    context= {'form': form}
+    return render(request, 'users/register.html', context)
+
+საბოლოოდ ასეთი იყო 
+
+ხოლო ამის html მოკლედ ჩვეულებირვი ფორმა შევქმენთ POST მეთოდით
+
+ხოლო ველიუები ჩასაწერები გამოვიტანე ასე {{form.username}} ესენი ჩვეულებრივად და ბოლოს ინფუთი submit და ეგაა
+
+ამის დაბლა დავწერე {{form.errors}} რათა რამე ერორი თუ იქნებოდა ეჩვენებინა
+
+ხოლო დაბლა უკვე დავწერე იუზერს თუ ქონდა აქუნთი მაშინ გადასულიყო ლოგინ ფეიჯზე
+
+და რათქმაუნდა რეგისტრაციის ურლ path('register/', views.register, name="register"),
+
+
+
+ლოგინ ფორმას შექმნა უნდა დავიწყოთ ჰტმლიდან ესეიგი
+
+ფორმა იქნება POST და ჩვეულებრივ ინფუთებს ვქმნით სახელისას და პაროლის  ბოლოს კი ინფუთი submitისთვის და ამის დაბლა მაქ დაწერილი ეს
+
+{% for message in messages %}
+
+          <p id="messages">{{message}}</p>
+
+          {% endfor %}
+
+ესეიგი როდესაც იუზერი შექმნის აქაუნთს ის ფლაშ მესიჯები რომლებიც რეგისტრაციაში უნდა ყოფილიყო გადმოვა აქ და დაეწერება რაც იქ ჩავწერეთ და ასევე მესიჯები რომლებიც ლოგინ ფორმას დასჭირდება
+
+ხოლო ამ ყველაფრის დაბლა არის თუ არაქვს იუზერს აქაუნთი გადავიდეს და დარეგისტრირდეს
+
+ეხლა viewsში რა ხდება
+
+ესენი გვჭირდება
+from django.contrib.auth import authenticate, login, logout
+
+def loginForm(request):
+
+    if request.method == 'POST':
+ეს username და password იქნება იმ ინფუთების სახელები რომელბიც ჰტმლში შევქმენით
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+ანუ ამით უკვე ვადგენთ იუზერი არის თუ არა მართლა დატაბეიზში თუ არის მაშინ ესენი უნდა დაემთხვეს ერთმანეთს
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None: ამით ვჩეკავთ იუზერი მართლა აქ არის თუ არა მგონი რავი ესე უნდა რა
+            login(request, user) და აქ ვიყენებთ ლოგინს რათა დავალოგინოთ იუზერი
+            return redirect('home')
+        else: და თუ ინფუთი არასწორეა ვგზავნით ამ მესიჯს
+            messages.info(request, 'Username OR Password is incorrect')
+
+    context= {}
+    return render(request, 'users/login.html', context)
+
+ესიგი ჯერ ვიღებთ იუზერნეიმს და პასვორდს
+
+path('login/', views.loginForm, name="login"),
+
+
+ხოლო ეხლა ლოგაუთი
+
+def logoutForm(request):
+    logout(request)
+    return redirect('login')
+
+ეს იქნება views
+
+და ნავბარში ან სადმე სადაც გვინდა რომ ეწეროს ლოგაუთი ვამატებთ ლოგაუთს  <a href="{% url 'logout' %}">logout</a> ასე რათა ეს ფუნქცია შესრულდეს და გადვიდეთ ლოგინ ფეიჯზე
+
+path('logout/', views.logoutForm, name="logout"),
+
+ხოლო ეხლა ბოლო რაღაც რომ იუზერს არ შეეძლოს რაღაც რაღაც ფეიჯებზე შესვლა დარეგისტრირების გარეშე
+
+
+მოკლედ შეიძლება ზოგჯერ დაგვჭირდეს ფეიჯების აკრძალვა იმ აიუზერებისთვის რომლებიც არ არიან დარეგისტრირებულები ამის გასაკეთებლად ვაკეთებთ შემდეგ რაღაცეებს
+
+from django.contrib.auth.decorators import login_required
+
+პირველ რიგში გვჭირდება ეს იმპორტი viewsში
+
+და შემდეგ იმ viewზე ვაწერთ თავზე ამას რომელიც გვინდა რომ აიკრძალოს 
+@login_required(login_url='login')
+როდესაც იმ ბათონს დააჭერს იუზერი რომელიც ამ ფეიჯზე მიდის ის გადაგვიყვანს პირდაპირ ლოგინ ფეიჯზე
+
+
+{% if request.user.is_authenticated %}
+<h4>Hello, {{request.user}}</h4>
+<a href="{% url 'logout' %}">logout</a>
+<hr />
+{% else %}
+<a href="{% url 'login' %}">login</a>
+{% endif %}
+
+ასეთი იფ ელსით შგვიძლია გავაკეთოთ ისე რომ თუ იუზერი დარეგისტრირებულია გამოჩნდეს ის ის და თუარა გამოჩნდეს ლოგინ უბრალოდ

@@ -1,0 +1,147 @@
+ამით ვქმნით ფუნქციას:
+CREATE FUNCTION function_name(param1 data_type, param2 data_type, ...)
+RETURNS return_type AS
+$$ 
+DECLARE
+  -- Local variables (if needed)
+BEGIN
+  -- Function body (SQL statements)
+END;
+$$ 
+LANGUAGE plpgsql;
+
+
+///////////////////////////////////////////
+CREATE OR REPLACE FUNCTION fn_get_sales_people() 
+-- SETOF indicates that the function returns a set of rows.
+RETURNS SETOF sales_person AS
+$body$
+	BEGIN
+		RETURN QUERY
+		SELECT *
+		FROM sales_person;
+	END;
+$body$
+LANGUAGE plpgsql
+
+ხოლო აქედან შეგვიძლია ის ინფორმაცია ამოვიღოთ რაც გვინდა
+select (fn_get_sales_people()).first_name
+
+
+////////////////////////////////////////////////////
+CREATE OR REPLACE FUNCTION fn_get_product() 
+აქ ვუთითებთ იმას რაც დაბრუნდება და იმათ ტიპებს
+RETURNS TABLE (
+    name varchar,
+	price numeric
+) AS
+$body$
+	BEGIN
+	    RETURN QUERY
+		select product.name, item.price from item
+		NATURAL JOIN product
+		ORDER BY item.price DESC
+		LIMIT 10;
+	END;
+$body$
+LANGUAGE plpgsql
+
+
+///////////////////////////////////////////////
+ამით შეგვიძლია რენდომულად ავიღოთ იუზერები
+CREATE OR REPLACE FUNCTION fn_random_users()
+RETURNS varchar AS 
+$body$
+DECLARE
+    rand int;
+	emp record;
+BEGIN
+    SELECT random()*(5 - 1) + 1 INTO rand;
+	SELECT *
+	FROM customer
+	INTO emp
+	WHERE id = rand;
+	RETURN CONCAT(emp.first_name, ' ', emp.last_name);
+END;
+$body$
+LANGUAGE plpgsql
+
+SELECT fn_random_users()
+
+
+//////////////////////////////////////////////
+აქ ვიყენებთ ინ აუთს:
+CREATE FUNCTION calculate_total_price(IN quantity INT, IN unit_price DECIMAL, OUT total_price DECIMAL)
+AS
+$$
+BEGIN
+    total_price := quantity * unit_price;
+    RETURN total_price;
+END;
+$$ 
+LANGUAGE plpgsql;
+
+
+//////////////////////////////////////////////
+ეს ინზე მაგალითი
+CREATE FUNCTION calculate_total_price(IN quantity INT, IN unit_price DECIMAL)
+RETURNS DECIMAL AS
+$$
+DECLARE
+    total_price DECIMAL;
+BEGIN
+    total_price := quantity * unit_price;
+    RETURN total_price;
+END;
+$$ 
+LANGUAGE plpgsql;
+
+
+//////////////////////////////////////////////
+აქ ვიყენებთ მხოლოდ ოუთს:
+CREATE FUNCTION get_user_count(OUT count INT)
+RETURNS VOID AS
+$$
+BEGIN
+    SELECT COUNT(*) INTO count FROM users;
+END;
+$$ 
+LANGUAGE plpgsql;
+
+
+//////////////////////////////////////////////
+აქ ვიყენებთ ორივეს ერთად
+CREATE OR REPLACE FUNCTION double_and_message(IN input_number INT, OUT doubled_number INT, OUT message VARCHAR)
+RETURNS RECORD AS
+$$
+BEGIN
+    doubled_number := input_number * 2;
+    message := 'The number ' || input_number || ' doubled is ' || doubled_number;
+END;
+$$ 
+LANGUAGE plpgsql;
+
+ეს იქნება აუთფუთი        10       | The number 5 doubled is 10
+
+
+
+ასე შეგვიძლია გამოვიყენოთ იფ ელსე
+CREATE OR REPLACE FUNCTION fn_check_order(the_month int)
+RETURNS varchar as
+$body$
+DECLARE
+   the_number int;
+BEGIN
+    select COUNT(purchase_order_number) INTO the_number FROM sales_order
+	where extract(month from time_order_taken) = the_month;
+	IF the_number > 5 THEN
+	   RETURN concat(the_number, ' its ok');
+	ELSEIF the_number < 5 THEN
+	   RETURN concat(the_number, ' its bad');
+	ELSE
+	    RETURN concat(the_number, ' on target');
+	END IF;
+END;
+$body$
+LANGUAGE plpgsql
+

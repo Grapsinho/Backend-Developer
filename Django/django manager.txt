@@ -1,0 +1,33 @@
+ესეიგი ჯანგო მენეგერები არიან ესეთი რაღაცეები მაგალითად როცა გვინდა თუმდაც დავითვალოთ რამდენია აქტიური იუზერი შეგვიძლია
+
+ამათი გამოყენება შეგვიძლია ყველა მოდელში
+class PersonManagerInactive(models.Manager):
+    def get_queryset(self):
+        return super(PersonManagerInactive, self).get_queryset().filter(is_active=False)
+
+class PersonManagerActive(models.Manager):
+    def get_queryset(self):
+        return super(PersonManagerActive, self).get_queryset().filter(is_active=True)
+
+ერთით ვითვლით არააქტიურ ხოლო მეორეთი აქტიურ იუზერებს
+
+შემდეგ ჩვენს მოდელში ვწერთ ამას
+
+inactive = PersonManagerInactive()
+active = PersonManagerActive()
+
+და ჩვეულებრივად შეგვიძლია გამოვიყენოთ
+
+Person.inactive.all() ყველა არააქტიური
+
+ასევე შეგვიძლია გავაკეთოთ ეს
+
+ამის გამოყენება შეგვიძლია მხოლოდ იმ ერთ მოდელში
+@classmethod
+def count_all(cls,):
+    return cls.objects.filter(is_active=True).count()
+
+ესეც იგივენაირად იმუშავებს
+
+
+

@@ -1,0 +1,14 @@
+ესეიგი პირველ რიგში ვქმნით დჯანგოსთვის ახალ სერვერს  თუ რაცარის ვორკბენჩში შემდეგ უკვე გადავდივართ ჯანგოს სეთინგებში და ვამატებთ ამეებს
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'studybud',
+        'USER': 'root',
+        'PASSWORD': 'chemirutpaswordi',
+        'HOST': '127.0.0.1',
+        'PORT': 3306
+    }
+}
+
+და ვიწერთ pip install mysqlclient ამას და ეგაა

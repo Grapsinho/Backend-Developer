@@ -1,0 +1,160 @@
+SELECT EXTRACT(YEAR FROM birth_date) AS birth_year,
+       EXTRACT(MONTH FROM birth_date) AS birth_month
+FROM customer;
+
+შეგვიძლია ამოვიღოთ ცალკე წელი და თვე 
+
+ანუ თუ მ იწყება
+SELECT first_name
+FROM customer
+WHERE first_name SIMILAR TO 'M%';
+
+ასო დიდიათუ პატარა მაგას აქვს აზრი!!
+
+SELECT first_name
+FROM customer
+WHERE first_name LIKE 'M______';
+ანუ ეს არის რო მს მერე რამდენი ქვედატირესაც დავწერთ იმდენ ასოანი სახელი უნდა იყოს
+
+
+SELECT EXTRACT(MONTH FROM birth_date) AS birth_month,
+COUNT(*) AS Amount
+FROM customer
+GROUP BY birth_month
+HAVING COUNT(*) > 1
+ORDER BY birth_month;
+
+ანუ ჯერ ვაჯგუფებთ და მერე ვეუბნებით რომ რომელიც აირს 1ზე მეტი
+
+
+ასე შგვიძლია ვიპოვოთ მაქსიმალური ღირებულება ყველაპროუქტისთვის
+select product.name,MAX(item.price) from item
+INNER JOIN product
+  ON product_id = product.id
+GROUP BY product.name
+ORDER BY MAX(item.price) DESC
+
+ამით ვიპოვე მარტო კაცების პროცენტული მაჩვენებელი
+SELECT concat(ROUND((select count(*) from patients
+       where gender = 'M') / CAST(count(*) AS float) * 100, 2), '%') AS percent_value FROM patients
+
+
+
+მოკლედ ლაგ ქივორდით გადავდივართ უკან და შეგვიძლია წამოვიღოთ წინა როუები მაგალთად როგორც აქ არის, პაციენტები რომლებიც მაგალითად პირველ როუზე იყვენენ ჩაწერილები უდრიდა 17ს მეორე როუზე კი 9 ანუ ამ შემთხვევაში ჩვენ 9ს გამოვაკელით 17 და მიციღეთ -8 ანუ 8ით მეტი პაციენტი იყო ჩაწერილი წინა დღეს
+
+select admission_date, count(admission_date), count(admission_date) - lag(count(admission_date), 1) over() as admission_count_change from admissions
+group by admission_date
+order by admission_date
+
+
+ამით ვასორტირებთ მონაცემებს მაგრამ თუ გვინდა რომ რომელიმე სუ თავში იყოს მაშ ვაკეთებთ ასე
+select province_name from province_names
+ORDER BY 
+  CASE 
+    WHEN province_name = 'Ontario' THEN 0  -- Set Ontario to have the lowest sorting value
+    ELSE 1  -- All other provinces follow, ordered by name
+  END,
+  province_name ASC;
+
+
+ამით დავადგინე თუ რომელ ექიმს რომელ წელს რამდენი მიღება ქონდა
+select doc.doctor_id, concat(doc.first_name, ' ', doc.last_name), 
+doc.specialty, year(adm.admission_date), count(adm.admission_date) from doctors as doc
+LEFT JOIN admissions as adm
+   ON doc.doctor_id = adm.attending_doctor_id
+group by doc.doctor_id, year(adm.admission_date)
+
+
+
+როცა ვიყენებთ ამას [] და შიგნით ვწერთ ასოებს ეგ ნიშნავს რომ ამ ასოებზე უნდა იწყებოდეს მაგალითად:
+SELECT * FROM Customers
+WHERE CustomerName LIKE '[bsp]%';
+
+ეს ნიშნავს რომ [a-f] ასოები იქნება ა დან ფ მდე 
+თუ ამას ვწერთ ანუ აქედან არცერთი არ უნდა იყოს [!acf]
+
+
+კაროჩე ძაან კაი რამეა შეგვიძლია გავიგოთ ნუ რაც არი რა კოდს გავიგებ მერე რო ვნახავ!!
+select product.name, item2.prc, item1.price,(case when item1.price > item2.prc
+		         then 'YES'
+		  ELSE null
+		  END) as remarks from product
+JOIN item as item1
+ON item1.product_id = product.id
+cross join (select avg(price) prc from item) as item2;
+
+
+შეგვიძლია გავიგოთ რომელი იყო დუპლიკატი მნიშვნელობა:
+select *
+from users321 u
+where u.user_id not in (
+select min(user_id) as user_id
+from users321
+group by user_name
+order by user_id)
+
+
+ამით შეგვიძლია მივიღოთ ბოლოდან მეორე აითმი:
+SELECT * FROM customer
+ORDER BY id DESC
+OFFSET 1 LIMIT 1;
+
+ოფსეთი უბრლოდ ტოვებს პირველ როუს
+
+
+ამით ვიპოვეთ ყველა სახელის მიხედვით დაბალი და მაღალი ფასიანი აითემები
+select pro.name, itm.price from
+(select *, 
+MAX(price) over(partition by product_id) as max_val,
+min(price) over (partition by product_id) as min_val
+from item) as itm
+JOIN product as pro ON pro.id = itm.product_id
+where itm.price = max_val or itm.price = min_val
+
+
+ვიპოვე ექიმები რომლებსაც აქვთ ერთნაირი ჰოსპიტალები მაგრამ სხვადასხვა სპეციალობები გამოვიყენე სელფ ჯოინი
+select d_a.* from doctors d_a, doctors d_b
+where d_a.hospital = d_b.hospital and d_a.id <> d_b.id and d_a.speciality <> d_b.speciality
+
+
+ამით ჩვენ მოგვაქ ყველა იმ იუზერის სახელი რომელიც გამეორდა მიყოლებით 3ჯერ
+select distinct user_name 
+from (select *, 
+case when user_name = lead(user_name) over(order by login_id) and
+user_name = lead(user_name, 2) over(order by login_id) then user_name
+ELSE NULL
+end as reap
+from LOGIN_DETAILS) as reo
+where reo.reap is not null
+
+
+
+მოკლედ ამით ყველა ახალი სტუდენტის სახელი დავწერეთ ძველი სტუდენტის სახელის გვერდით
+select id,student_name,                                   ეს ნიშნავს რო დიფოულტ ველიო იქნება ისევ სტუდენტ_ნეიმი
+case when id%2 <> 0 then lead(student_name,1,student_name) over(order by id)
+when id%2 = 0 then lag(student_name) over(order by id) end as new_student_name
+from students;
+
+
+ამით ვიპოვეთ ტემპერატურა რომელიც არის 0ზე ქვემოთ და თან მიყოლებით რამდენი დღეა
+select id, city, temperature, day
+from (
+    select *,
+        case when temperature < 0
+              and lead(temperature) over(order by day) < 0
+              and lead(temperature,2) over(order by day) < 0
+        then 'Y'
+        when temperature < 0
+                             აქ ვამოწმებთ უკანა როუსაც რომ იყოს დაბალი ნულზე
+              and lead(temperature) over(order by day) < 0
+              and lag(temperature) over(order by day) < 0
+        then 'Y'
+        when temperature < 0
+                             აქ უკვე წინა ორი როუ უნდა იყოს დაბალი ნულზე
+              and lag(temperature) over(order by day) < 0
+              and lag(temperature,2) over(order by day) < 0
+        then 'Y'
+        end as flag
+    from weather) x
+where x.flag = 'Y';
+

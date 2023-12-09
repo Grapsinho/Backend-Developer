@@ -1,0 +1,83 @@
+ესეიგი ეს არის დატაბეისებისთვის პირველ რიგში ვაკეთებთ ქომანდ ლაინში ვწერთ python manage.py migrate რათა გაეშვას ყველა SQL ქომანდი ხოლო როდესაც შევქმნით ახალ მოდელს ვწერთ python manage.py makemigrations და შემდეგ ისევ ის და ყველაფერი ჩავარდება migrate ფოლდერში როდესაც ჩვწერთ python manage.py migrate ამას
+
+
+ასე ვქმნით მოდელს
+class Room(models.Model): #ჩავთვალოთ ეს არის ცხრილის სახელი
+    # ესენი უკვე არიან ქოლუმნები
+
+    #host = 
+    #topic = 
+    name = models.CharField(max_length=100)
+                      #ანუ შეიძლება რომ null იყოს
+                      #ბლანკ არის ფორმისთვის form ხოლო null დატაბეისისთვის
+    description = models.TextField(null=True, blank=True) # ეს უბრალოდ იქნება უფრო დიდი ტექსტ ფიელდი
+    #participants = 
+    updated = models.DateTimeField(auto_now=True) # ანუ როდესაც დავაწვებით ბათონს ეს დააყენებს დროს
+    created = models.DateTimeField(auto_now_add=True) # ანუ თუ ბათონს დავაწვებით რამოდენიმეჯერ ეს არ შეიცვლება ის მაღლითა კი
+
+    def __str__(self):
+        return self.name
+
+
+ხოლო რათა ვნახოთ ეს ყველაფერი საჭიროა შევქმნათ ჯერ სუპერიუზერი python manage.py createsuperuser შემდეგ გადავდივართ ადმინ პანელში და ვრეგისტრირდებით ხოლო როდესაც შევალთ ჯერ ჩვენი მოდელი არ გამოჩნდება ამისათვის საჭიროა შევიდეთ admin.pyში და დავწეროთ ესენი
+
+from .models import Room   Room არის ჩემი შექმნილი მოდელის ქოლუმნის სახელი
+
+admin.site.register(Room)
+
+ესეიგი შეგვიძლია ასევე შევქმნათ ფორეიგნ ქი არაფერი განსხვავებული როგორც SQL ისე მუშაობს აქაც
+
+class Messages(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    body = models.TextField()
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.body[0:50]
+
+მაგალითად როგორც აქაა მოცემული
+
+ეხლა მოთხოვნები ჩვენი დატაბეისიდან როგორ წამოვიღოთ ინფორმაცია მონაცემები
+ხოლო სანამ ამეებს ვიზავთ საჭიროა გადმოვიტანოთ ჩვენი მოდელი
+from .models import Room
+
+rooms = Room.objects.all() ამით ვიღებთ ყველა მონაცემს
+
+ანუ რაღაც მონაცემი რომელიც ემთხვევა მნიშვნელობას 
+queryItem = ModelName.objects.get(attribute="value")
+
+ეს თუ ემთხვევა ფრაიმარი ქის
+querySet = ModelName.objects.get(pk=id)
+
+ეს დააბრუნებს ყველა აითემს რომელიც ემთხვევა მნიშვნელობას ესენი!
+queryItem = ModelName.objects.filter(attribute="value")
+                                                          .filter(attribute_startswith='value')
+                             .filter(attribute_contains='value')
+                             .filter(attribute1="value1", attribute2="value2")
+
+                                                          რომელიმეს თუ ემთხვევა
+                                                          .filter(Q(attribute1="value1") | Q(attribute2="value2"))
+
+                                                           ანუ მოგვაქ თუ ემთხვევა რაღაც ატრიბუტი და ასევე ვალაგებთ რომელიმე სხვა ატრიბუტის მიხედვით
+                                                           .filter(attribute="value").order_by('other_attribute')
+
+                                                            თუ ემთხვევა რომელიმე ატრიბუტს და ასევე გამორიცხავს სხვა ატრიბუტს
+                                                           .filter(attribute="value").exclude(other_attribute="value")
+
+                                                            .filter(attribute="value").count() გვითვლის
+
+                              ანუ ქეისსენსიტივი უნდა იყოს თუ რაღაც რა
+                                                            .filter(attribute_incontains='value')
+
+                              gt ნიშნავს greater then ანუ მაღალი თუა
+                                                            .filter(attribute__gt='value')
+
+                                                            ან მაღალია ან უდრის
+                              .filter(attribute__gte='value')
+                                                            ასევე თუ ჩავანაცვლებთ ამ ორს ltთი ეს არის less then და ასევე გვაქ lte less then or equal
+
+queryItem = ModelName.objects.exclude(attribute="value") გამორიცხავს ყველა ობიექტს რომელიც ემთხვევა ამ მნიშვნელობას
+
+დაორდერება შეგვიძლია შევაბრუნოთ თუ მნიშვნელობებს წინ მივუწერთ - ამას

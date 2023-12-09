@@ -1,0 +1,59 @@
+CREATE TABLE <table_name> (
+    column1 datatype,
+    column2 datatype,
+    ...
+);
+
+CREATE TABLE sales_person(
+first_name VARCHAR(30) NOT NULL,
+last_name VARCHAR(30) NOT NULL,
+email VARCHAR(60) NOT NULL,
+street VARCHAR(50) NOT NULL,
+city VARCHAR(40) NOT NULL,
+state CHAR(2) NOT NULL DEFAULT 'PA',
+zip SMALLINT NOT NULL,
+phone VARCHAR(20) NOT NULL,
+birth_date DATE NULL,
+sex sex_type NOT NULL,
+date_hired TIMESTAMP NOT NULL,
+id SERIAL PRIMARY KEY
+);
+
+INSERT INTO <table_name> (column1, column2, ...) VALUES (value1, value2, ...);
+
+CREATE SCHEMA <schema_name>;
+DROP SCHEMA <schema_name>;
+
+UPDATE <table_name> SET column1 = value1 WHERE condition;
+DELETE FROM <table_name> WHERE condition;
+
+ALTER TABLE students
+ADD COLUMN email VARCHAR(100); ვამატებთ ქოლუმნს
+
+ALTER TABLE students
+DROP COLUMN email; ვშლით
+
+ALTER TABLE students
+RENAME COLUMN name TO full_name; სახელს ვუცვლით
+
+ALTER TABLE students
+ALTER COLUMN age TYPE SMALLINT; ტიპს ვუცვლით
+
+ALTER TABLE students
+ADD CONSTRAINT valid_age CHECK (age >= 18); ანუ ამით ვზღუდავთ იმას რომ ასაკი არ ჩამოცდეს 18
+
+ALTER TABLE students
+DROP CONSTRAINT valid_age; ვშლით ამ შეზღუდვას
+
+ALTER TABLE customer
+ALTER COLUMN sex TYPE sex_type USING sex::sex_type;
+
+ALTER COLUMN sex TYPE sex_type: Indicates that the column sex will be altered to change its data type to sex_type.
+
+select concat(first_name, ' ', last_name) AS Name, state, phone
+from customer ამით ვაერთიანებთ სახელს და გვარს და ასევე ვამატებთ state და phone
+
+SELECT DISTINCT state
+FROM customer
+where state IN ('CA', 'NJ')
+ORDER BY state; იქნება მხოლოდ უნიკალურები ანუ რამდენიმე ერთანირი არიქნება და იქნება ის შტატები მხოლოდ სადაც ('CA', 'NJ') არის

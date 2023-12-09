@@ -1,0 +1,49 @@
+#eg 3 x 4 wertilebi da bombi O 3 4 inputit miatitebine
+#sheqmeni 3 x 4 ragaca romelime koordinadze dade bombi 1 wamis shemdeg danarchen adgilebze 1 wamis shemdeg aafetqe
+#tavdapirvelad dadebuli bombi da aseve mis garshemo arsebuli bombebic tan gaiyolos
+
+import threading
+symbol = "."
+
+how_row = int(input("how many row?: ")) # -
+how_column = int(input("how many column?: ")) # |
+
+row = int(input("enter row: "))
+column = int(input("enter column: "))
+
+def bomb_man1():
+    for i in range(1, how_column):  # ვერტიკალი |
+        for j in range(1, how_row):  # ჰორიზონტალი -
+            if j == column and i == row:
+                symbol = 'O'
+            else:
+                symbol = "."
+            print(symbol, end="")  # ეს არის ერთმანეთისგან რო გამოვყოთ ჰორიზონტალურად
+        print("\n")  # ვერტიკალურად
+
+def bomb_man2():
+    for i in range(1, how_column):  # ვერტიკალი
+        for j in range(1, how_row):  # ჰორიზონტალი
+            symbol = 'O'
+            print(symbol, end="")  # ეს არის ერთმანეთისგან რო გამოვყოთ ჰორიზონტალურად
+        print("\n")  # ვერტიკალურად
+
+def bomb_man3():
+    for i in range(1, how_column):  # ვერტიკალი
+        for j in range(1, how_row):  # ჰორიზონტალი
+            if j == column or i == row:
+                symbol = '.'
+            else:
+                symbol = "O"
+
+            print(symbol, end="")  # ეს არის ერთმანეთისგან რო გამოვყოთ ჰორიზონტალურად
+        print("\n")  # ვერტიკალურად
+
+
+start_time = threading.Timer(1 ,bomb_man1)
+start_time1 = threading.Timer(2 ,bomb_man2)
+start_time2 = threading.Timer(3 ,bomb_man3)
+
+start_time.start()
+start_time1.start()
+start_time2.start()

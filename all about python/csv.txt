@@ -1,0 +1,107 @@
+მოკლედ როდესაც გვაქ რაიმე ტექსტური ფაილი ჩვენი ის შეგვიძლია წავიკითხოთ csv_ით
+
+
+import csv
+with open('name.txt', 'r') as f:
+    csv_reader = csv.reader(f, delimiter='\t')
+
+    for i in csv_reader:
+        print(i)
+
+ეხლა წავიკთხე ჩვ ტექსტური ფაილი delimiter='\t' ეს ნიშნავს რომ დაბოლოებები შეიცვალოს იმით რაც აქ არის მითითებული
+
+
+თუ ლუპის მაღლა დავუწერთ next(csv_reader) მაშინ ჩვენ გამოვტოვებთ პირველ მნიშნელობას ამ შემთხვევაში ჩვენი პირველი მნიშვნელობა არის first_name, last_name, email ამათ გამოვტოვებთ 
+
+
+import csv
+with open('name.txt', 'r') as f:
+    csv_reader = csv.reader(f, delimiter='\t')
+
+    with open('name1.csv', 'w') as f1:
+        csv_writer = csv.writer(f1, delimiter='\t')
+
+        for i in csv_reader:
+            csv_writer.writerow(i)
+
+ასე მე ეხლა პირველ რიგში წავიკითხე ჩვენი პირველი ფაილი და შემდგომ დავიწყე ახლის წაკიტხვა თუმცა ეს ფაილი არგვაქ და როდესაც გავუშვებთ პროგრმას თვითონ შექმნის პირველ რიგში ვქმნით csv_writer ეს უბრალოდ სახელია შემდეგ უკვე ვკითხულობთ ამ ფაილს და ბოლო ლუპში გატარებული ჩვენი პირველ ფაილის მნიშვნელობებს ვსვავთ ჩვენს მეორე ფაილში
+
+
+
+მაგრამ უფრო კარგი გზა რათა წავიკითხოთ ჩვენი ფაილები არის DictReader
+
+import csv
+with open('name.txt', 'r') as f:
+    csv_reader = csv.DictReader(f, delimiter='\t')
+
+    for i in csv_reader:
+        print(i['first_name'])
+
+ანუ ეს გვიბრუნებს ლექსიკონს ეხლა მე ვპირნტავ ყველა first_name_ს მოკლედ ეს უფრო მარტივია გამოსაყენებლად
+
+
+
+import csv
+with open('name.txt', 'r') as f:
+    csv_reader = csv.DictReader(f, delimiter='\t')
+
+    with open('name1.csv', 'w') as f1:
+        field_names = ['first_name', 'last_name']
+        csv_writer = csv.DictWriter(f1, fieldnames=field_names ,delimiter='\t')
+
+        csv_writer.writeheader()
+
+        for i in csv_reader:
+            csv_writer.writerow(i)
+
+
+ამით უკვე ვწერთ ჩვენს ფაილში მოკლედ თავიდან ვკითხულობთ DictReader_ით შემდგომ თუ გვინდა რომ ფაილში რამე ჩავწეროთ ვკითხულობთ DictWriter_ით, field_names არის ის ყველა ქოლუმნის სახელი რაც გვინდა რომ წამოვიღოთ და ამას ვუწერთ DictWriter_შიც შემდეგ თუ გვინდა რომ first_name, last_name ანუ ქოლუმნების სახელები წამოვიღოთ მაშინ ვიყენებთ writeheader() მეთოდს ჩვენს csv_writer_თან და ბოლოს უკვე ჩვეულებრივათ შეგვაქ ეს მონაცემები
+
+
+import csv
+with open('name.txt', 'r') as f:
+    csv_reader = csv.DictReader(f, delimiter='\t')
+
+    with open('name1.csv', 'w') as f1:
+        field_names = ['first_name']
+        csv_writer = csv.DictWriter(f1, fieldnames=field_names ,delimiter='\t')
+
+        csv_writer.writeheader()
+
+        for i in csv_reader:
+                        del i['last_name']
+            csv_writer.writerow(i)
+
+ანუ თუ გვინდა რომ მაგალითად მარტო first_name წავიღოთ მაშინ ფიელდნეიმებიდანაც ვიღებთ last_name_ს  და ბოლოს გადატანის დროსაც ვშლით და გადადის მხოლოდ ის რომელიც გვინდა
+
+
+
+import csv
+
+html_output = ''
+
+with open('name2.txt', 'r') as f:
+    csv_reader = csv.DictReader(f)
+
+    next(csv_reader)
+
+    names = list()
+
+    for i in csv_reader:
+        if i['firstName'] == 'arari':
+            break
+
+        names.append(f'{i["firstName"]} {i["lastName"]}')
+
+html_output = f'<p>There are {len(names)} people in this site</p>'
+
+html_output += '\n<ul>'
+
+for i in names:
+    html_output += f'\n<li>{i}</li>'
+
+html_output += '\n</ul>'
+
+print(html_output)
+
+მოკლედ ამ კოდში მე უბრალოდ რაღაც ფაილიდან წამოვიღე მხოლოდ სახელები და შემდეგ გამოვტოვე ადგილი სადაც სახელი უდრის რაღაც უაზრობას მანამდე next გამოვტოვე ადგილები რომლებიც არ მინდოდა ბოლოს ეს ყველაფერი html ტეგებში გადავიტანე და ეგიყო
