@@ -1,0 +1,145 @@
+ეს არის ViewSet ანუ ერთ მოდელში არის ყველაფერი 
+
+class PostModelViewSet(viewsets.ViewSet):
+    def list(self, request):
+        queryset = Post.objects.all()
+        serializer = PostSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            user = self.request.user
+            serializer.save(author=user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, pk=None):
+        try:
+            queryset = Post.objects.get(pk=pk)
+            serializer = PostSerializer(queryset)
+            return Response(serializer.data)
+        except:
+            return Response(
+                {"error": "Post not found"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+         ეს ცვლის მთლიან ობიექტს PUT
+    def update(self, request, pk=None):
+        instance = Post.objects.get(pk=pk)
+        serializer = PostSerializer(instance, data=request.data)
+        if serializer.is_valid() and instance.author == self.request.user:
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(
+                {"message": "You are not author of this post"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+         და ეს მხოლოდ იმას რაც მოგვაწოდა მომხმარებელმა მხოლოდ იმას ცვლის მაგალითად თარიღს
+         არ ააბდეითებს PATCH
+    def partial_update(self, request, pk=None):
+        instance = Post.objects.get(pk=pk)
+        serializer = PostSerializer(instance, data=request.data, partial=True)
+        if serializer.is_valid() and instance.author == self.request.user:
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(
+                {"message": "You are not author of this post"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        instance = Post.objects.get(pk=pk)
+        if instance.author == self.request.user:
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(
+                {"message": "You are not author of this post"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+ეს უკვე მთავარი ფაილის ურლა ანუ იმ ფაილის სადაც სეთინგებია
+
+from rest_framework.routers import DefaultRouter
+from post.views import PostModelViewSet
+
+router = DefaultRouter()
+router.register(r"All_Posts", PostModelViewSet, basename="All_Posts")
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("viewSets/", include(router.urls)),
+]
+
+ეს არის ტესტები მაგისთვის
+
+from rest_framework.test import APITestCase, APIRequestFactory, APIClient
+from .views import PostListCreateView
+from django.urls import reverse
+from rest_framework import status
+from django.contrib.auth import get_user_model
+from post.models import Post
+
+
+User = get_user_model()
+
+
+class PostViewSetTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="test_user",
+            password="password123",
+            email="giorgimagaria@gmail.com",
+        )
+        self.client = APIClient()
+        self.client.login(
+            username="test_user",
+            password="password123",
+            email="giorgimagaria@gmail.com",
+        )
+        self.post = Post.objects.create(
+            title="Test Post", content="Test content", author=self.user
+        )
+        self.client.force_authenticate(user=self.user)
+
+    def test_list(self):
+        response = self.client.get("http://127.0.0.1:8000/viewSets/All_Posts/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_create(self):
+        data = {
+            "title": "New Post",
+            "content": "New content",
+        }
+        response = self.client.post(
+            "http://127.0.0.1:8000/viewSets/All_Posts/", data, format="json"
+        )
+        self.assertEqual(response.status_code, 201)
+
+    def test_retrieve_post(self):
+        response = self.client.get(f"http://127.0.0.1:8000/viewSets/All_Posts/1/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_post(self):
+        data = {"title": "Updated Post", "content": "Updated content"}
+        response = self.client.put(f"http://127.0.0.1:8000/viewSets/All_Posts/1/", data)
+        print(self.post.id)
+        self.assertEqual(response.status_code, 200)
+
+    def test_partial_update_post(self):
+        data = {"title": "Partial Update Post"}
+        response = self.client.patch(
+            f"http://127.0.0.1:8000/viewSets/All_Posts/1/", data
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_post(self):
+        response = self.client.delete(f"http://127.0.0.1:8000/viewSets/All_Posts/1/")
+        self.assertEqual(response.status_code, 204)
