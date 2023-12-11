@@ -1,0 +1,82 @@
+pip install -U drf-yasg[validation] ვიწერთ ამით
+
+'drf_yasg', ვამატებთ ინსტალედ აპებში
+
+ეს იქნება ჩვენი სეთინგების ფაილი სადაცაა მანდ რო ურლ არის ეგ ფაილი
+
+from django.contrib import admin
+from django.urls import path, include, re_path
+from rest_framework.routers import DefaultRouter
+from post.views import PostModelViewSet
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Snippets API",
+        default_version="v1",
+        description="Test description",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@snippets.local"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
+router = DefaultRouter()
+router.register(r"All_Posts", PostModelViewSet, basename="All_Posts")
+
+urlpatterns = [
+    re_path(
+        r"swagger(?P<format>\.json|\.yaml)$",
+        schema_view.without_ui(cache_timeout=0),
+        name="schema-json",
+    ),
+        აქ ვუთითებთ ლინკს სადაც უნდა იყოს ჩვენი ეს სვაგერი
+    path(
+        "",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    re_path(
+        r"redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"
+    ),
+    path("admin/", admin.site.urls),
+    path("", include("post.urls")),
+    path("auth/", include("accounts.urls")),
+    path("viewSets/", include(router.urls)),
+]
+
+
+შემდეგ ვაიმპორტებთ ამას
+from drf_yasg.utils import swagger_auto_schema უკვე view ფაილში
+
+@swagger_auto_schema(
+        operation_summary="This lists all post",
+        operation_description="return all posts and have pagination",
+    )
+
+და ესე შეგვიძლია ავღწეროთ ჩენი ფუნქცია ამას ვაწერთ ფუნქციისს თავზე
+
+
+თუ გვინდა რომ გავიაროთ ავტორიზაცია
+REST_FRAMEWORK = {
+      აქ მხოლოდ ის უნდა გვქონდეს რომლითაც გავდივართ ავტორიზაციას
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+}
+
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"},
+    }
+}
+
+და სანამ ტოკენს დავწერთ უნდა დავწეროთ Bearer
+
+
+
+
