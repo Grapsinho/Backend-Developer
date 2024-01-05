@@ -1,0 +1,107 @@
+პირველ რიგში როცა საიტი დავასრულეთ კარგი იქნება რომ გავუშვათ ეს ქომანდი:
+python manage.py check --deploy
+ეს გვეტყვის ყველა იმ რაღაცას რაც საჭიროა რომ დავიცვათ საიტი
+
+რათქმაუნდა
+DEBUG = FALSE
+
+ეს ორი არის Cross-site Scripting (XSS)
+ეს არის შეტევა საიტზე რომლის დროსაც ადამიანს შეყავს ცუდი სკრიპტი ჩვენს საიტზე
+ამისგან ცოტათი თავი რომ დავიცვათ საჭიროა ეს ორი რაღაც
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+მოკლედ ეს ორი მთლად ვერ გვიშველის ამიტომაც გვჭირდება კიდევ რაღაც შეზღუდვები დავუყენოთ იუზერს
+მაშინ როცა წერს რაიმე კომენტარს ან სერჩავს რაღაცას
+
+ჯანგოში:
+import bleach
+
+def sanitize_input(user_input):
+    cleaned_input = bleach.clean(user_input, tags=['p', 'strong', 'em'], attributes={'*': ['class']})
+    return cleaned_input
+
+ესეიგი ამით ჩვენ უბრალოდ ვიძახით რომ შეიძლება მხოლოდ იმ ტაგების გამოყენება რომლებიც ჩამოთვლილია აქ და ასევე შეიძლება მხოლოდ კლას ატრიბუტის გამოყენება
+
+და თუ გვინდა რომ ავკრძალოთ ყველანაირი ტაგი და ატრიბუტი მაშინ ვიყენებთ
+cleaned_input = bleach.clean(user_input, tags=[], attributes={})
+
+ჯავასკრიპტში ვიყენებთ ამ ფუნქციას
+function sanitizeInput(userInput) {
+    // Remove all HTML tags from user input
+    let sanitizedInput = userInput.replace(/(<([^>]+)>)/gi, '');
+    return sanitizedInput;
+}
+
+მოკლედ ესენი დაგვჭირდება იმისთვის რომ ავირიდოთ ეს რაღაც თავიდან
+
+
+ეს უზრუნველყოფს რომ ყველა არა HTTPS რექუესტები გადაამისამართოს HTTPზე
+SECURE_SSL_REDIRECT = True
+მოკლედ ეს იცავს ქუქიებს
+SESSION_COOKIE_SECURE = True
+ანუ ცსრფ ქუქიებს იცავს https
+CSRF_COOKIE_SECURE = True
+
+უნდა შევცვალოთ ჩვენი ადმინ ფეიჯის ურლ:
+
+from django.contrib import admin
+from django.urls import path
+
+urlpatterns = [
+    path('secret-admin/', admin.site.urls) # Updated 
+]
+
+ანუ მარტივად რო ვთქვათ ესენი ნიშნავს რომ ბრაუზერებს არ შეუძლიათ შემოვიდნენ ჩვენს ვებსაიტზე httpით
+SECURE_HSTS_SECONDS = 86400
+SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+ასევე სექრეთ ქი უნდა გვქონდეს ცალკე ფაილში და იქიდან უნდა წავიკითხოთ
+with open(os.path.join(BASE_DIR, 'secret_key.txt')) as f:
+    SECRET_KEY = f.read().strip()
+
+
+ესეიგი ამ ყველაფერს რომ მოვრჩებით მერე საჭიროა რომ დავაკონფიგუროთ ჩვენი 
+სტატიკ ფაილები ამისათვის საჭიროა პირველრიგში ჩავიწეროთ whitenoise
+
+შემდეგ დავაკონფიგურიროთ ჩვენი სტატიკ ფაილები
+
+ეს იქნება ის ფაილი სადაც შევინახავთ ჩვენს სტატიკ ფაილებს
+STATIC_URL = '/static/'
+ანუ ეს იქნება მედიას ურლ 
+MEDIA_URL = '/images/'
+
+ამით ვთქვით რომ ეს იქნება ჩვენი სტატიკ ფაილების საქაღალდე
+STATICFILES_DIRS = [
+    BASE_DIR / 'static'
+]
+
+ანუ აქ ვინახავთ ფოტოებს
+MEDIA_ROOT = BASE_DIR / 'static/images'
+
+და ეს გვჭირდება რათქმაუნდა
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+ჯერ ვუთითებთ ამას 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+შემდეგ გვჭირდება რომ გავუშვათ ქოლექთ სტატიკის ქომანდი რათა შევაგროვოთ სტატიკ ფაილები
+
+და ამის შემდეგ ვაკეთებთ ამას
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+ამის შემდეგ
+
+pip install whitenoise
+
+MIDDLEWARE = [
+    # ...
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    # ...
+]
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
