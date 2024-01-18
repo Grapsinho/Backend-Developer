@@ -1,0 +1,27 @@
+__call() Method:
+
+გამოიძახება მაშინ როდესაც გვინდა მოვიპოვოთ წვდომა არარსებულ მეთოდზე
+
+class MyClass {
+    public function __call($methodName, $arguments) {
+        echo "Calling method '$methodName' with arguments: " . implode(', ', $arguments);
+    }
+}
+
+$obj = new MyClass();
+$obj->undefinedMethod('arg1', 'arg2');
+
+__callStatic() Method:
+
+ეს არის იგივე მაგრამ სტატიკ მეთოდებისთვის
+
+class MyClass {
+    public static function __callStatic($methodName, $arguments) {
+        echo "Calling static method '$methodName' with arguments: " . implode(', ', $arguments);
+    }
+}
+
+MyClass::undefinedStaticMethod('arg1', 'arg2');
+
+
+

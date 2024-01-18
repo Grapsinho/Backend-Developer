@@ -1,0 +1,19 @@
+    function readFilesRecursively($dir) {
+        $files = scandir($dir);
+    
+        foreach ($files as $file) {
+            if ($file != '.' && $file != '..') {
+                $path = $dir . '/' .  $file;
+                if (is_dir($path)) {
+                    readFilesRecursively($path);
+                } elseif ($file == 'test.txt' || $file == 'test1.txt' || $file == 'test5.txt') {
+                    $content = file_get_contents($path);
+                    echo "File: $path\nContent:\n$content\n\n";
+                }
+            }
+        }
+    }
+    
+    // Provide the starting directory
+    $startingDirectory = './';
+    readFilesRecursively($startingDirectory);

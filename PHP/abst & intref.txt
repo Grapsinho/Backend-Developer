@@ -1,0 +1,198 @@
+Abstract Classes:
+
+1) შეუძლიათ ქონდეთ კონსტრუქტორი
+
+2) შეუძლია ქონდეს მეთოდები თავისი იმპლემენტაციით ან იმპლემენტაციის გარეშე, ყველა აბსტრაქტ მეთოდი უნდა ჰქონდეს
+abstract ქივორდი წინ
+
+3) შეუძლია ქონდეს public, protected, private
+
+4) შეუძლია მხოლოდ ერთ კლასთან კავშირი
+
+Interfaces:
+
+1) არა ქონსტრუქტორი
+
+2) შეუძლიათ მხოლოდ გამოაცხადონ მეთოდები და ისინი უნდა იყვნენ ფაბლიქზე
+
+3) ანუ ესენი მხოლოდ დებენ კონტრქტს ქცევებზე არ აინტერესებთ როგორ იქნება ის წარმოდგენილი
+
+4) შეუძლია ბევრს დაუკავშირდეს
+
+//////////////////////////////////////////////////////////
+//////////////////////Use Cases///////////////////////////
+//////////////////////////////////////////////////////////
+
+Abstract Classes:
+
+ანუ ვიყენებთ მაშინ როდესაც გვინდა უბრალოდ ჩვეულებრივი ფორმის გაკეთება შვილობილი ელემენტებისთვის
+შეგვიძლია განვსაზღვროთ შვილობილი ელემენტების ფროფერთიები და მათი მეთოდები ან შეგვიძლია უბრალოდ აბსტრაქტ მეთოდები გავაკეთოთ და შვილ ელემენტს მივანდოთ მათი განსაზღვრა
+
+// Abstract class representing a base Employee
+abstract class Employee {
+    protected $name;
+    protected $baseSalary;
+
+    public function __construct($name, $baseSalary) {
+        $this->name = $name;
+        $this->baseSalary = $baseSalary;
+    }
+
+    // Abstract method to calculate the bonus for each employee type
+    abstract protected function calculateBonus();
+
+    // Common method to calculate the total salary (base + bonus)
+    public function calculateTotalSalary() {
+        $bonus = $this->calculateBonus();
+        return $this->baseSalary + $bonus;
+    }
+
+    // Common method to display employee information
+    public function displayInfo() {
+        echo "Employee: $this->name\n";
+        echo "Base Salary: $this->baseSalary\n";
+        echo "Total Salary: " . $this->calculateTotalSalary() . "\n\n";
+    }
+}
+
+// Concrete class representing a Regular Employee
+class RegularEmployee extends Employee {
+    // Implementing the abstract method to calculate bonus for regular employees
+    protected function calculateBonus() {
+        // Regular employees get a fixed bonus
+        return 1000;
+    }
+}
+
+// Concrete class representing a Manager
+class Manager extends Employee {
+    private $teamSize;
+
+    public function __construct($name, $baseSalary, $teamSize) {
+                ანუ ამის გამოყენებით შეგვიძლია წვდომა მოვიპოვოთ მშობლის ფროფერთიებზე და ასევე
+                დავამატოთ ჩვენები ან მოდიფიცირება გავუკეთოთ
+        parent::__construct($name, $baseSalary);
+        
+                $this->teamSize = $teamSize;
+    }
+
+    // Implementing the abstract method to calculate bonus for managers
+    protected function calculateBonus() {
+        // Managers get a bonus based on the size of their team
+        return $this->teamSize * 500;
+    }
+}
+
+// Usage
+$regularEmployee = new RegularEmployee("John Doe", 50000);
+$manager = new Manager("Jane Smith", 80000, 10);
+
+$regularEmployee->displayInfo();
+$manager->displayInfo();
+
+
+
+Interfaces:
+
+ვიყენებთ მაშინ როდესაც გვინდა განვსაზღვროთ მხოლოდ შვილობილი ემენეტის ქცევა დეტალების გარეშე
+კარგია მაშინ როდესაც კლასებს აქვთ განსხვავებული იმპლემენტაციეები მაგრამ უნდა დაიცვან საერთო მეთოდები
+
+// Interface for elements that can be displayed on a website
+interface Displayable {
+    public function display();
+}
+
+// Interface for elements that can be shared on social media
+interface Shareable {
+    public function share($platform);
+}
+
+// Concrete class representing an article
+class Article implements Displayable, Shareable {
+    private $title;
+    private $content;
+
+    public function __construct($title, $content) {
+        $this->title = $title;
+        $this->content = $content;
+    }
+
+    public function display() {
+        echo "Article: $this->title\n";
+        echo "$this->content\n";
+    }
+
+    public function share($platform) {
+        echo "Sharing article on $platform\n";
+    }
+}
+
+// Concrete class representing a video
+class Video implements Displayable, Shareable {
+    private $title;
+    private $url;
+
+    public function __construct($title, $url) {
+        $this->title = $title;
+        $this->url = $url;
+    }
+
+    public function display() {
+        echo "Video: $this->title\n";
+        echo "URL: $this->url\n";
+    }
+
+    public function share($platform) {
+        echo "Sharing video on $platform\n";
+    }
+}
+
+// Concrete class representing an image
+class Image implements Displayable {
+    private $caption;
+    private $url;
+
+    public function __construct($caption, $url) {
+        $this->caption = $caption;
+        $this->url = $url;
+    }
+
+    public function display() {
+        echo "Image: $this->caption\n";
+        echo "URL: $this->url\n";
+    }
+}
+
+// Function to display and share content elements
+function displayAndShare(Displayable $element, Shareable $shareableElement = null) {
+    $element->display();
+
+    if ($shareableElement !== null) {
+        $shareableElement->share("Twitter");
+    }
+
+    echo "\n";
+}
+
+// Usage
+$article = new Article("Understanding Interfaces in PHP", "Interfaces in PHP provide a way to define a contract...");
+$video = new Video("Introduction to PHP Programming", "https://www.example.com/intro-to-php");
+$image = new Image("Beautiful Sunset", "https://www.example.com/sunset.jpg");
+
+displayAndShare($article, $article);
+displayAndShare($video, $video);
+displayAndShare($image);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
